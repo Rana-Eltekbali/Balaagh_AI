@@ -1,0 +1,12 @@
+                          precision    recall  f1-score   support
+
+          Fire/Explosion       0.87      0.91      0.89        43
+    Flood/Severe Weather       0.81      0.76      0.78        33
+Infrastructure/Utilities       0.80      0.78      0.79        45
+                   Other       0.64      0.57      0.60        28
+  People at Risk/Medical       0.71      0.71      0.71        42
+     Road/Transportation       0.82      0.89      0.85        45
+
+                accuracy                           0.78       236
+               macro avg       0.77      0.77      0.77       236
+            weighted avg       0.78      0.78      0.78       236
