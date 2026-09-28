@@ -1,0 +1,3 @@
+# Large model files (too big for GitHub)
+*.safetensors
+*.pt
