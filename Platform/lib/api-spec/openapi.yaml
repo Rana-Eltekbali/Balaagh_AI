@@ -1,0 +1,410 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Balaagh AI report analysis API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: reports
+    description: Crisis report analysis and management
+  - name: dashboard
+    description: Dashboard summaries
+  - name: analytics
+    description: Analytics and model evaluation
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /reports:
+    get:
+      operationId: listReports
+      tags: [reports]
+      summary: List analyzed crisis reports
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/IncidentClass"
+        - $ref: "#/components/parameters/Priority"
+        - $ref: "#/components/parameters/Location"
+        - $ref: "#/components/parameters/Relevance"
+        - $ref: "#/components/parameters/Sort"
+      responses:
+        "200":
+          description: Matching reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
+    post:
+      operationId: createReport
+      tags: [reports]
+      summary: Save an analyzed report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportInput"
+      responses:
+        "201":
+          description: Saved report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+  /reports/analyze:
+    post:
+      operationId: analyzeReport
+      tags: [reports]
+      summary: Analyze an Arabic crisis report using demo logic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalysisInput"
+      responses:
+        "200":
+          description: Structured analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalysisResult"
+  /reports/{id}:
+    get:
+      operationId: getReport
+      tags: [reports]
+      summary: Get one analyzed report
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: Report details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "404":
+          description: Report not found
+    delete:
+      operationId: deleteReport
+      tags: [reports]
+      summary: Delete a saved report
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "204":
+          description: Report deleted
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard statistics and recent reports
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+  /locations/summary:
+    get:
+      operationId: getLocationsSummary
+      tags: [analytics]
+      summary: Get location reporting summaries
+      responses:
+        "200":
+          description: Location summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationsSummary"
+  /analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      tags: [analytics]
+      summary: Get analytics and demo model evaluation
+      responses:
+        "200":
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyticsSummary"
+components:
+  parameters:
+    ReportId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+    IncidentClass:
+      name: incidentClass
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/IncidentClass"
+    Priority:
+      name: priority
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Priority"
+    Location:
+      name: location
+      in: query
+      required: false
+      schema:
+        type: string
+    Relevance:
+      name: relevance
+      in: query
+      required: false
+      schema:
+        $ref: "#/components/schemas/Relevance"
+    Sort:
+      name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [date, priority, incidentClass]
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    IncidentClass:
+      type: string
+      enum:
+        - Fire / Explosion
+        - Flood / Severe Weather
+        - Infrastructure / Utilities
+        - Road / Transportation
+        - People at Risk / Medical
+        - Other
+    Priority:
+      type: string
+      enum: [Low, Medium, High, Critical]
+    Relevance:
+      type: string
+      enum: [Relevant, Irrelevant]
+    Report:
+      type: object
+      required:
+        - id
+        - originalText
+        - incidentClass
+        - priority
+        - location
+        - peopleAtRisk
+        - requiredSupport
+        - relevance
+        - summary
+        - createdAt
+        - analysisTime
+      properties:
+        id:
+          type: integer
+        originalText:
+          type: string
+        incidentClass:
+          $ref: "#/components/schemas/IncidentClass"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        location:
+          type: string
+        peopleAtRisk:
+          type: boolean
+        requiredSupport:
+          type: string
+        relevance:
+          $ref: "#/components/schemas/Relevance"
+        summary:
+          type: string
+        createdAt:
+          type: string
+        analysisTime:
+          type: string
+    ReportInput:
+      type: object
+      required:
+        - originalText
+        - incidentClass
+        - priority
+        - location
+        - peopleAtRisk
+        - requiredSupport
+        - relevance
+        - summary
+      properties:
+        originalText:
+          type: string
+          minLength: 1
+        incidentClass:
+          $ref: "#/components/schemas/IncidentClass"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        location:
+          type: string
+        peopleAtRisk:
+          type: boolean
+        requiredSupport:
+          type: string
+        relevance:
+          $ref: "#/components/schemas/Relevance"
+        summary:
+          type: string
+    AnalysisInput:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+    AnalysisResult:
+      type: object
+      required:
+        - incidentClass
+        - priority
+        - location
+        - peopleAtRisk
+        - requiredSupport
+        - relevance
+        - summary
+      properties:
+        incidentClass:
+          $ref: "#/components/schemas/IncidentClass"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        location:
+          type: string
+        peopleAtRisk:
+          type: boolean
+        requiredSupport:
+          type: string
+        relevance:
+          $ref: "#/components/schemas/Relevance"
+        summary:
+          type: string
+    DashboardSummary:
+      type: object
+      required: [totalReports, criticalReports, highPriority, reportsToday, recentReports, byIncidentClass, byPriority]
+      properties:
+        totalReports:
+          type: integer
+        criticalReports:
+          type: integer
+        highPriority:
+          type: integer
+        reportsToday:
+          type: integer
+        recentReports:
+          type: array
+          items:
+            $ref: "#/components/schemas/Report"
+        byIncidentClass:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+        byPriority:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+    LocationsSummary:
+      type: object
+      required: [locations]
+      properties:
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationSummary"
+    LocationSummary:
+      type: object
+      required: [location, reports, criticalReports, peopleAtRisk]
+      properties:
+        location:
+          type: string
+        reports:
+          type: integer
+        criticalReports:
+          type: integer
+        peopleAtRisk:
+          type: integer
+    AnalyticsSummary:
+      type: object
+      required: [byIncidentClass, byPriority, byLocation, bySupport, peopleAtRisk, evaluation]
+      properties:
+        byIncidentClass:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+        byPriority:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+        byLocation:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+        bySupport:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountItem"
+        peopleAtRisk:
+          type: integer
+        evaluation:
+          $ref: "#/components/schemas/ModelEvaluation"
+    CountItem:
+      type: object
+      required: [label, count]
+      properties:
+        label:
+          type: string
+        count:
+          type: integer
+    ModelEvaluation:
+      type: object
+      required: [accuracy, precision, recall, macroF1, confusionMatrix]
+      properties:
+        accuracy:
+          type: number
+        precision:
+          type: number
+        recall:
+          type: number
+        macroF1:
+          type: number
+        confusionMatrix:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Balaagh AI"
+description = "A presentation-ready decision-support dashboard for analyzing Arabic crisis reports in the Libyan context with structured demo AI results, report management, locations, analytics, and project documentation."
+version = "1.0.0"
+id = "artifacts/balaagh-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24412
+
+[services.development]
+run = "pnpm --filter @workspace/balaagh-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/balaagh-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/balaagh-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24412"
+BASE_PATH = "/"

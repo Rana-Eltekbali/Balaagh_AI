@@ -1,0 +1,640 @@
+Build a complete modern web application called "Balaagh AI".
+
+Project subtitle:
+AI-Powered Crisis Report Analysis and Decision-Support Platform
+
+PROJECT IDEA:
+Balaagh AI is a web-based AI decision-support prototype designed to analyze Arabic crisis and emergency reports in the Libyan context.
+
+The user submits an Arabic crisis report, and the system analyzes it and returns structured information:
+- Incident Class
+- Priority
+- Location
+- People at Risk
+- Required Support
+- Relevance
+- Short AI-generated Summary
+
+IMPORTANT:
+This is a university AI capstone prototype, not a real emergency dispatch system.
+Do NOT include emergency calling, real-time emergency dispatch, social media APIs, mobile-app functionality, or crisis prediction.
+
+==================================================
+1. TECHNOLOGY
+==================================================
+
+Build the website using:
+- React
+- TypeScript
+- Tailwind CSS
+- Modern responsive UI
+- Lucide icons
+- Use a clean component-based architecture
+
+Create a backend/API structure that can later connect to Python AI models.
+
+For now, if an actual AI model is not available, use realistic mock AI responses so the complete website can be demonstrated.
+
+Keep the AI logic modular so we can later connect:
+- TF-IDF + Logistic Regression
+- MARBERT or another Arabic transformer
+- Location extraction model
+- LLM summarization
+
+==================================================
+2. DESIGN
+==================================================
+
+Create a professional command-center style dashboard.
+
+The design should feel:
+- Modern
+- Clean
+- Professional
+- Minimal
+- Suitable for an AI university capstone project
+- Easy to understand during a presentation
+
+Use a light interface with a professional blue/indigo accent color.
+
+Support Arabic text properly and use RTL layout where Arabic content is displayed.
+
+The website should work well on:
+- Desktop
+- Laptop
+- Tablet
+- Mobile
+
+Use cards, badges, tables, filters, and clear visual hierarchy.
+
+==================================================
+3. MAIN NAVIGATION
+==================================================
+
+Create a sidebar navigation containing:
+
+1. Dashboard
+2. Analyze Report
+3. Reports
+4. Locations
+5. Analytics
+6. About Project
+
+At the bottom of the sidebar show:
+
+Balaagh AI
+AI Crisis Report Analysis
+
+==================================================
+4. DASHBOARD
+==================================================
+
+Create a main dashboard page.
+
+Header:
+"Good evening"
+"Balaagh AI Command Center"
+
+Add a short description:
+"AI-powered analysis and prioritization of Arabic crisis reports."
+
+Show summary statistic cards:
+
+- Total Reports
+- Critical Reports
+- High Priority
+- Reports Today
+
+Create a section called:
+
+"Recent Crisis Reports"
+
+Display a table with:
+
+- Report
+- Incident Class
+- Priority
+- Location
+- People at Risk
+- Status
+- Time
+
+Priority badges:
+Critical = red
+High = orange
+Medium = yellow
+Low = green
+
+Incident class badges/icons should be visually distinguishable.
+
+Add charts for:
+- Reports by Incident Class
+- Reports by Priority
+
+Use realistic demo data.
+
+==================================================
+5. ANALYZE REPORT PAGE
+==================================================
+
+This is the most important page.
+
+Title:
+"Analyze Crisis Report"
+
+Subtitle:
+"Enter an Arabic crisis report to analyze it using Balaagh AI."
+
+Create a large RTL Arabic textarea.
+
+Placeholder:
+
+"مثال: في حريق في منزل في جنزور وفي طفلين داخل البيت"
+
+Add a button:
+
+"Analyze Report"
+
+When clicked, show a loading state:
+
+"Analyzing report..."
+
+Then display the AI analysis result.
+
+The result must contain:
+
+Incident Class:
+Fire / Explosion
+
+Priority:
+Critical
+
+Location:
+Janzour
+
+People at Risk:
+Yes
+
+Required Support:
+Firefighting / Rescue
+
+Relevance:
+Relevant
+
+Summary:
+"بلاغ عن اندلاع حريق في منزل بمنطقة جنزور مع وجود طفلين داخل المنزل، مما يتطلب استجابة عاجلة."
+
+Make the result visually clear using cards and badges.
+
+Also add a button:
+
+"Save Report"
+
+==================================================
+6. INCIDENT CLASSES
+==================================================
+
+Use exactly these six incident classes:
+
+1. Fire / Explosion
+2. Flood / Severe Weather
+3. Infrastructure / Utilities
+4. Road / Transportation
+5. People at Risk / Medical
+6. Other
+
+Do not add additional incident classes.
+
+Examples:
+
+Fire / Explosion:
+- House fire
+- Car fire
+- Explosion
+- Building fire
+
+Flood / Severe Weather:
+- Flooding
+- Heavy rain
+- Storm
+- Strong winds
+- Water accumulation
+
+Infrastructure / Utilities:
+- Electricity outage
+- Water outage
+- Sewage problems
+- Fuel station problems
+- Damaged infrastructure
+
+Road / Transportation:
+- Traffic accident
+- Road closure
+- Dangerous road conditions
+- Traffic congestion
+- Transportation problems
+
+People at Risk / Medical:
+- Injured person
+- Person trapped
+- Medical emergency
+- People needing rescue
+- People at risk
+
+Other:
+- Reports that do not clearly belong to another category
+
+==================================================
+7. LABELS
+==================================================
+
+Each analyzed report must have these fields:
+
+Incident Class:
+Fire / Explosion
+Flood / Severe Weather
+Infrastructure / Utilities
+Road / Transportation
+People at Risk / Medical
+Other
+
+Priority:
+Low
+Medium
+High
+Critical
+
+Location:
+City / District / Neighborhood
+
+People at Risk:
+Yes
+No
+
+Required Support:
+Medical
+Firefighting
+Traffic Management
+Rescue
+
+Relevance:
+Relevant
+Irrelevant
+
+==================================================
+8. REPORTS PAGE
+==================================================
+
+Create a complete reports management page.
+
+Display all reports in a table.
+
+Columns:
+
+- Report
+- Incident Class
+- Priority
+- Location
+- People at Risk
+- Required Support
+- Relevance
+- Date
+
+Add filters:
+
+Incident Class
+Priority
+Location
+Relevance
+
+Add a search bar:
+
+"Search reports..."
+
+Allow sorting by:
+- Priority
+- Date
+- Incident Class
+
+Clicking a report should open a detailed report view.
+
+==================================================
+9. REPORT DETAILS
+==================================================
+
+Create a detailed report page/modal.
+
+Show:
+
+Original Report
+AI Summary
+Incident Class
+Priority
+Location
+People at Risk
+Required Support
+Relevance
+Analysis Time
+
+Add a section:
+
+"AI Analysis"
+
+Show the structured AI result clearly.
+
+Add:
+"Back to Reports"
+
+==================================================
+10. LOCATIONS PAGE
+==================================================
+
+Create a page showing locations mentioned in reports.
+
+Show statistics such as:
+
+- Most Reported Locations
+- Reports by City
+- Critical Reports by Location
+
+Use Libyan locations in demo data, such as:
+
+Tripoli
+Tajoura
+Janzour
+Misrata
+Benghazi
+Zawiya
+Gharyan
+Zliten
+Sabha
+
+Do not use a real map API for now.
+
+Create a clean location table instead.
+
+==================================================
+11. ANALYTICS PAGE
+==================================================
+
+Create an analytics dashboard.
+
+Show:
+
+Reports by Incident Class
+Reports by Priority
+Reports by Location
+People at Risk Reports
+Required Support Distribution
+
+Use charts and cards.
+
+Include a section:
+
+"Model Evaluation"
+
+Show placeholder/demo metrics for:
+
+Accuracy
+Precision
+Recall
+Macro F1
+
+Also include a placeholder confusion matrix.
+
+Clearly label these as:
+
+"Demo / Placeholder Results"
+
+because the real AI models will be connected later.
+
+==================================================
+12. ABOUT PROJECT PAGE
+==================================================
+
+Title:
+
+"About Balaagh AI"
+
+Description:
+
+"Balaagh AI is an AI-powered crisis report analysis and decision-support platform designed for Arabic crisis reports in the Libyan context."
+
+Explain that the system aims to:
+
+- Classify crisis incidents
+- Estimate priority
+- Extract locations
+- Identify people at risk
+- Identify required support
+- Generate concise summaries
+- Organize reports through a dashboard
+
+Add an "AI Approach" section:
+
+Baseline Model:
+TF-IDF + Logistic Regression
+
+Deep Learning Model:
+MARBERT / Arabic Transformer
+
+Location Extraction:
+Arabic disaster/location resources + Libyan place-name data
+
+Summarization:
+Constrained LLM
+
+Add a note:
+
+"Balaagh AI is a decision-support prototype and does not replace human judgment or emergency authorities."
+
+==================================================
+13. DEMO DATA
+==================================================
+
+Create realistic Arabic demo reports.
+
+Examples:
+
+1.
+"في حريق في منزل في جنزور وفي طفلين داخل البيت"
+
+Class:
+Fire / Explosion
+Priority:
+Critical
+Location:
+Janzour
+People at Risk:
+Yes
+Required Support:
+Firefighting / Rescue
+Relevance:
+Relevant
+
+2.
+"الأمطار الغزيرة سببت تجمع كبير للمياه في تاجوراء والطريق شبه مسكر"
+
+Class:
+Flood / Severe Weather
+Priority:
+High
+Location:
+Tajoura
+People at Risk:
+No
+Required Support:
+Traffic Management
+Relevance:
+Relevant
+
+3.
+"في انقطاع كهرباء في منطقة طرابلس من ساعات"
+
+Class:
+Infrastructure / Utilities
+Priority:
+Medium
+Location:
+Tripoli
+People at Risk:
+No
+Required Support:
+None
+Relevance:
+Relevant
+
+4.
+"حادث سير بين سيارتين على الطريق الساحلي في مصراتة"
+
+Class:
+Road / Transportation
+Priority:
+High
+Location:
+Misrata
+People at Risk:
+Yes
+Required Support:
+Medical / Traffic Management
+Relevance:
+Relevant
+
+Create at least 10 realistic demo reports.
+
+==================================================
+14. AI MOCK FUNCTION
+==================================================
+
+Create a modular function:
+
+analyzeReport(text)
+
+It should return:
+
+{
+  incidentClass,
+  priority,
+  location,
+  peopleAtRisk,
+  requiredSupport,
+  relevance,
+  summary
+}
+
+Use keyword-based mock logic for the demo.
+
+For example:
+If the Arabic report contains words related to fire, return Fire / Explosion.
+
+If it contains flooding/rain/water, return Flood / Severe Weather.
+
+If it contains electricity/water/sewage/fuel, return Infrastructure / Utilities.
+
+If it contains accident/road/traffic, return Road / Transportation.
+
+If it contains injured/trapped/ambulance/rescue, return People at Risk / Medical.
+
+Otherwise return Other.
+
+This is only a temporary demonstration implementation.
+
+==================================================
+15. DATABASE
+==================================================
+
+Create a simple database structure for reports.
+
+Report fields:
+
+id
+originalText
+incidentClass
+priority
+location
+peopleAtRisk
+requiredSupport
+relevance
+summary
+createdAt
+
+Seed the database with the demo reports.
+
+==================================================
+16. USER EXPERIENCE
+==================================================
+
+The website should feel like a real AI crisis analysis dashboard.
+
+Use:
+- Empty states
+- Loading states
+- Error states
+- Success notifications
+- Hover effects
+- Smooth transitions
+- Responsive tables
+- Clear badges
+- Professional typography
+
+Do not overcrowd the interface.
+
+The Analyze Report page should be the main demonstration feature.
+
+==================================================
+17. IMPORTANT RESTRICTIONS
+==================================================
+
+Do NOT:
+- Create a mobile app
+- Add real emergency dispatch
+- Automatically contact authorities
+- Add social media APIs
+- Add crisis prediction
+- Add image/video analysis
+- Add unnecessary complex features
+- Claim that demo AI results are real model predictions
+
+The system must clearly be presented as a university AI prototype.
+
+==================================================
+18. FINAL REQUIREMENT
+==================================================
+
+Build the complete working application, not just a static landing page.
+
+Make sure:
+- All navigation works
+- All pages are connected
+- Analyze Report works with demo AI logic
+- Reports can be searched and filtered
+- Dashboard statistics update from the reports
+- Arabic RTL text displays correctly
+- Demo data is included
+- The UI is presentation-ready
+
+At the end, provide clear instructions for:
+1. How to run the project
+2. Where the AI analysis function is located
+3. Where to connect the real Python/MARBERT model later
+4. Where the database is configured
