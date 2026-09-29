@@ -1,3 +1,11 @@
+import { createRoot } from 'react-dom/client';
+
+import App from './App';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { setBaseUrl } from '@workspace/api-client-react';
+
+import './index.css';
+
 // ---------------------------------------------------------------------------
 // Client-side analysis logic mirroring api-server/src/lib/report-analysis.ts
 // Used in static mode (GitHub Pages) where there is no backend.
@@ -59,16 +67,7 @@ function staticAnalyzeText(text: string) {
 
   return { incidentClass, priority, location, peopleAtRisk, requiredSupport, relevance, summary };
 }
-
 // ---------------------------------------------------------------------------
-
-
-
-import App from './App';
-import { ErrorBoundary } from '@/components/error-boundary';
-import { setBaseUrl } from '@workspace/api-client-react';
-
-import './index.css';
 
 // In development the API runs at localhost:3001.
 // In production (GitHub Pages static deploy) we serve data from /data/*.json
@@ -94,6 +93,13 @@ if (isStatic) {
       if (path === '/api/dashboard/summary')  file = `${base}/data/dashboard-summary.json`;
       else if (path === '/api/analytics/summary' || path.startsWith('/api/analytics/summary')) file = `${base}/data/analytics-summary.json`;
       else if (path === '/api/locations/summary') file = `${base}/data/locations-summary.json`;
+      // POST /api/reports/analyze — MUST come before the generic /api/reports handler
+      else if (path === '/api/reports/analyze' && init?.method?.toUpperCase() === 'POST') {
+        let text = '';
+        try { text = JSON.parse(init.body as string)?.text ?? ''; } catch { /* ignore */ }
+        const result = staticAnalyzeText(text);
+        return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
       else if (path.match(/^\/api\/reports\/\d+$/)) {
         // Single report — fetch from reports.json and filter
         const id = Number(path.split('/').pop());
@@ -129,13 +135,6 @@ if (isStatic) {
         }
 
         return new Response(JSON.stringify(all), { status: 200, headers: { 'Content-Type': 'application/json' } });
-      }
-      // POST /api/reports/analyze — run analysis client-side (no backend in static mode)
-      else if (path === '/api/reports/analyze' && init?.method?.toUpperCase() === 'POST') {
-        let text = '';
-        try { text = JSON.parse(init.body as string)?.text ?? ''; } catch { /* ignore */ }
-        const result = staticAnalyzeText(text);
-        return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
       // POST /api/reports — store the new report in sessionStorage so it persists within the tab
       else if (path === '/api/reports' && init?.method?.toUpperCase() === 'POST') {
