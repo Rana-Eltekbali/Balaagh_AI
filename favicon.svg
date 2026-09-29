@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="7" fill="hsl(221, 61%, 40%)"/>
+
+  <!-- ShieldCheck icon (lucide style, scaled to fit) -->
+  <path d="M16 4 L26 8 L26 16 C26 22 21 27 16 29 C11 27 6 22 6 16 L6 8 Z"
+        fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
+  <polyline points="11,16 14,19 21,12"
+            stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Cyan accent dot top-right -->
+  <circle cx="27" cy="5" r="4" fill="#00C8E0"/>
+</svg>
