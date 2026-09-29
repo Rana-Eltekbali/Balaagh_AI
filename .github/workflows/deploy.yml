@@ -33,7 +33,7 @@ jobs:
 
       - name: Build dashboard
         working-directory: Platform/artifacts/balaagh-ai
-        run: pnpm run build
+        run: pnpm run build:static
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

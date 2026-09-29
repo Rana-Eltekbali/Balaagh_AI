@@ -1,0 +1,880 @@
+﻿{
+    "locations":  [
+                      {
+                          "location":  "البيضاء",
+                          "reports":  7,
+                          "criticalReports":  2,
+                          "peopleAtRisk":  5
+                      },
+                      {
+                          "location":  "درنة",
+                          "reports":  6,
+                          "criticalReports":  3,
+                          "peopleAtRisk":  4
+                      },
+                      {
+                          "location":  "طريق المطار",
+                          "reports":  6,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  2
+                      },
+                      {
+                          "location":  "الزاوية",
+                          "reports":  5,
+                          "criticalReports":  2,
+                          "peopleAtRisk":  3
+                      },
+                      {
+                          "location":  "الخمس",
+                          "reports":  5,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  3
+                      },
+                      {
+                          "location":  "تاجوراء",
+                          "reports":  4,
+                          "criticalReports":  2,
+                          "peopleAtRisk":  2
+                      },
+                      {
+                          "location":  "زليتن",
+                          "reports":  4,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "غريان",
+                          "reports":  4,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "مرزق",
+                          "reports":  3,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  2
+                      },
+                      {
+                          "location":  "السراج",
+                          "reports":  3,
+                          "criticalReports":  2,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "عين زارة",
+                          "reports":  3,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "بني وليد",
+                          "reports":  3,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  2
+                      },
+                      {
+                          "location":  "قصر بن غشير",
+                          "reports":  3,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سبها",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الكفرة",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "قنفودة غرب بنغازي",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "طريق الشط وطرابلس",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "البركة",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "رأس لانوف",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سوق الجمعة",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "العجيلات",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "وادي الربيع",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "هون",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الدهماني",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الرجبان",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "جنزور غرب طرابلس",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "غات",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الجفرة",
+                          "reports":  2,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  2
+                      },
+                      {
+                          "location":  "الكيش في بنغازي",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Tripoli",
+                          "reports":  2,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق الشط في طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "سرت",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الهواري",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سبها المنشية",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "مطار معيتيقة الدولي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "البريقة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "بوهديمة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "بير العالم",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "حي شبنة وبنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طبرق",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق المشتل عين زارة طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "مقهى غرناطة وتاجوراء",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "حمده",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الظهرة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق الجزيرة مصراتة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "قرقارش",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "حي الزيتون",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "تلبيغة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سوق الخميس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "كوبري المصانع",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الهواري في بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "التربولي مول",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "أوباري",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "جنزور",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "شبنة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "حي المنشية وسبها",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الهضبة الخضراء",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الجرابة",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "شارع طرابلس أجدابيا",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "النجيلة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "أبو سليم",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق وازن والغزايا",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "قاريونس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "شارع الجرابة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "مراد مسعود",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "صبراتة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "سوق الجمعة في طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الشواطئ الليبية",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "مستشفى طرابلس الجامعي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الحدائق وبنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الزنتان",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق الجامعة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "معتيقة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الحميدية",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "شارع النجمة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "مصراتة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "وسط مدينة الزاوية",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "وادي مرسيط",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "حي أرض بن علي والفويهات",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق الشط وتاجوراء",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الطريق الساحلي شرقي سرت",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "مطار معيتيقة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الساحل الشرقي الليبي",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "البركة في بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "طريق سرت-الجفرة",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "طريق الهضبة طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سجن الجديدة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "بن عاشور",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "تاجورا",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "يفرن",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق البينيا شارع البرج عين زارة",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "مصفاة الزاوية",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "كوبري زناتة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الدافنية غرب مصراتة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "رقدالين",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "جامعة بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الهضبة في طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "رأس اجدير",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "نالوت",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "أجدابيا",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الصياد",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الطريق الساحلي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سلوق جنوب بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "سلوق",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الفويهات",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "زريق في مصراتة",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "ودان",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الليثي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "بوعطني في بنغازي",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "صلاح الدين في طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "شط الهنشير",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "شارع الزاوية",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "طريق المطار في طرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "أبوكشفة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "تراغن",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "زوارة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق عرادة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "شارع 24 ديسمبر",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "حي الأندلس بطرابلس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "شحات",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "محطة وقود بوترابة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "طريق الشط سوق الجمعة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "النوفليين",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "حي الأندلس",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "القره بوللي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الجميل",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "شارع المعدات الطبية",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "طريق الخلاطات",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "وادي درنة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "الليثي في بنغازي",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "تاكنس",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "راس اجدير",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الهضبة",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "صلاح الدين",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "الزاوية المركز",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "جنوب طرابلس",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "حي الأكواخ",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Sabha",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "Gharyan",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Zliten",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Zawiya",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Benghazi",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "Misrata",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  1
+                      },
+                      {
+                          "location":  "Tajoura",
+                          "reports":  1,
+                          "criticalReports":  0,
+                          "peopleAtRisk":  0
+                      },
+                      {
+                          "location":  "Janzour",
+                          "reports":  1,
+                          "criticalReports":  1,
+                          "peopleAtRisk":  1
+                      }
+                  ]
+}

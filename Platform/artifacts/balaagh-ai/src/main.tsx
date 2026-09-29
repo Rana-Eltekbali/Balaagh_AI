@@ -7,12 +7,125 @@ import { setBaseUrl } from '@workspace/api-client-react';
 import './index.css';
 
 // In development the API runs at localhost:3001.
-// In production (GitHub Pages static deploy) we hit the same origin or an
-// explicit URL provided via the VITE_API_BASE_URL env variable.
-setBaseUrl(import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : ''));
+// In production (GitHub Pages static deploy) we serve data from /data/*.json
+// because there is no server to run. A static mode flag is injected via
+// VITE_STATIC_MODE=true when building for GitHub Pages.
+const isStatic = import.meta.env.VITE_STATIC_MODE === 'true';
+
+if (isStatic) {
+  // Patch global fetch to intercept API calls and redirect them to static JSON files.
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const originalFetch = window.fetch.bind(window);
+
+  window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+
+    // Only intercept relative /api/* calls
+    if (url.startsWith('/api/') || url.includes('/api/')) {
+      const path = url.includes('/api/') ? url.substring(url.indexOf('/api/')) : url;
+
+      // Map API routes → static JSON files
+      let file: string | null = null;
+
+      if (path === '/api/dashboard/summary')  file = `${base}/data/dashboard-summary.json`;
+      else if (path === '/api/analytics/summary' || path.startsWith('/api/analytics/summary')) file = `${base}/data/analytics-summary.json`;
+      else if (path === '/api/locations/summary') file = `${base}/data/locations-summary.json`;
+      else if (path.match(/^\/api\/reports\/\d+$/)) {
+        // Single report — fetch from reports.json and filter
+        const id = Number(path.split('/').pop());
+        const res = await originalFetch(`${base}/data/reports.json`, init);
+        const all = await res.json();
+        const report = all.find((r: { id: number }) => r.id === id);
+        if (!report) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 });
+        return new Response(JSON.stringify(report), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      else if (path === '/api/reports' || path.startsWith('/api/reports?')) {
+        // List reports — fetch from reports.json and apply basic filters
+        const fetchUrl = new URL(path, window.location.href);
+        const params = fetchUrl.searchParams;
+        const res = await originalFetch(`${base}/data/reports.json`, init);
+        let all: Record<string, unknown>[] = await res.json();
+
+        const search = params.get('search')?.toLowerCase();
+        const incidentClass = params.get('incidentClass');
+        const priority = params.get('priority');
+        const location = params.get('location');
+        const sort = params.get('sort') ?? 'date';
+
+        if (search) all = all.filter(r => [r.originalText, r.summary, r.location].some(v => String(v).toLowerCase().includes(search)));
+        if (incidentClass) all = all.filter(r => r.incidentClass === incidentClass);
+        if (priority) all = all.filter(r => r.priority === priority);
+        if (location) all = all.filter(r => String(r.location).toLowerCase() === location.toLowerCase());
+
+        if (sort === 'priority') {
+          const order = ['Critical', 'High', 'Medium', 'Low'];
+          all.sort((a, b) => order.indexOf(String(a.priority)) - order.indexOf(String(b.priority)));
+        } else if (sort === 'incidentClass') {
+          all.sort((a, b) => String(a.incidentClass).localeCompare(String(b.incidentClass)));
+        }
+
+        return new Response(JSON.stringify(all), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+      // Mutations (POST/PATCH/DELETE) are no-ops in static mode
+      else if (init?.method && ['POST', 'PATCH', 'DELETE'].includes(init.method.toUpperCase())) {
+        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
+
+      if (file) {
+        // For analytics/summary with filters: fetch the full file then filter client-side
+        if (path.startsWith('/api/analytics/summary?')) {
+          const fetchUrl = new URL(path, window.location.href);
+          const params = fetchUrl.searchParams;
+          const res = await originalFetch(`${base}/data/reports.json`, init);
+          let all: Record<string, unknown>[] = await res.json();
+
+          const incidentClass = params.get('incidentClass');
+          const priority = params.get('priority');
+          const loc = params.get('location');
+          const par = params.get('peopleAtRisk');
+          const dateFrom = params.get('dateFrom');
+          const dateTo = params.get('dateTo');
+
+          if (incidentClass) all = all.filter(r => r.incidentClass === incidentClass);
+          if (priority) all = all.filter(r => r.priority === priority);
+          if (loc) all = all.filter(r => String(r.location).toLowerCase() === loc.toLowerCase());
+          if (par === 'true') all = all.filter(r => r.peopleAtRisk === true);
+          if (par === 'false') all = all.filter(r => r.peopleAtRisk === false);
+          if (dateFrom) all = all.filter(r => new Date(String(r.createdAt)) >= new Date(dateFrom));
+          if (dateTo) {
+            const to = new Date(dateTo); to.setHours(23, 59, 59, 999);
+            all = all.filter(r => new Date(String(r.createdAt)) <= to);
+          }
+
+          const countBy = (items: string[]) => {
+            const m = new Map<string, number>();
+            for (const v of items) m.set(v, (m.get(v) ?? 0) + 1);
+            return [...m.entries()].map(([label, count]) => ({ label, count })).sort((a, b) => b.count - a.count);
+          };
+
+          const summary = {
+            byIncidentClass: countBy(all.map(r => String(r.incidentClass))),
+            byPriority: countBy(all.map(r => String(r.priority))),
+            byLocation: countBy(all.filter(r => r.location).map(r => String(r.location))),
+            bySupport: countBy(all.filter(r => r.requiredSupport).map(r => String(r.requiredSupport))),
+            peopleAtRisk: all.filter(r => r.peopleAtRisk === true).length,
+            totalFiltered: all.length,
+            evaluation: { accuracy: 0.86, precision: 0.82, recall: 0.79, macroF1: 0.8, confusionMatrix: [[8,1,0,0,0,0],[1,7,1,0,0,0],[0,1,8,0,0,0],[0,0,1,7,1,0],[0,0,0,1,8,0],[0,0,0,0,1,7]] },
+          };
+          return new Response(JSON.stringify(summary), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+
+        return originalFetch(file, init);
+      }
+    }
+
+    return originalFetch(input, init);
+  };
+} else {
+  setBaseUrl(import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : ''));
+}
 
 createRoot(document.getElementById('root')!, {
-  // Keeps caught errors off reportError(), which would raise the dev overlay.
   onCaughtError: (error, errorInfo) => {
     console.error(error, errorInfo.componentStack);
   },
