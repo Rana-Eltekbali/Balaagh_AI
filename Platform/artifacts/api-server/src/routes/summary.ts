@@ -3,6 +3,7 @@ import {
   GetDashboardSummaryResponse,
   GetAnalyticsSummaryResponse,
   GetLocationsSummaryResponse,
+  GetAnalyticsSummaryQueryParams,
 } from "@workspace/api-zod";
 import * as store from "../lib/store";
 
@@ -61,14 +62,40 @@ router.get("/locations/summary", async (_req, res): Promise<void> => {
   res.json(GetLocationsSummaryResponse.parse({ locations }));
 });
 
-router.get("/analytics/summary", async (_req, res): Promise<void> => {
-  const reports = store.getAll();
+router.get("/analytics/summary", async (req, res): Promise<void> => {
+  const parsed = GetAnalyticsSummaryQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const { incidentClass, priority, location, peopleAtRisk, dateFrom, dateTo } = parsed.data;
+
+  let reports = store.getAll();
+
+  // Apply filters
+  if (incidentClass)   reports = reports.filter((r) => r.incidentClass === incidentClass);
+  if (priority)        reports = reports.filter((r) => r.priority === priority);
+  if (location)        reports = reports.filter((r) => r.location.toLowerCase() === location.toLowerCase());
+  if (peopleAtRisk === "true")  reports = reports.filter((r) => r.peopleAtRisk === true);
+  if (peopleAtRisk === "false") reports = reports.filter((r) => r.peopleAtRisk === false);
+  if (dateFrom) {
+    const from = new Date(dateFrom);
+    reports = reports.filter((r) => new Date(r.createdAt) >= from);
+  }
+  if (dateTo) {
+    const to = new Date(dateTo);
+    to.setHours(23, 59, 59, 999);
+    reports = reports.filter((r) => new Date(r.createdAt) <= to);
+  }
+
   res.json(GetAnalyticsSummaryResponse.parse({
     byIncidentClass: countBy(reports.map((r) => r.incidentClass)),
     byPriority: countBy(reports.map((r) => r.priority)),
     byLocation: countBy(reports.map((r) => r.location).filter(Boolean)),
     bySupport: countBy(reports.map((r) => r.requiredSupport)),
     peopleAtRisk: reports.filter((r) => r.peopleAtRisk).length,
+    totalFiltered: reports.length,
     evaluation: {
       accuracy: 0.86,
       precision: 0.82,

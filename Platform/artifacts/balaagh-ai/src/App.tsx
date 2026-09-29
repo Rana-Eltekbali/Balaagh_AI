@@ -182,9 +182,10 @@ function ReportRow({ report }: { report: Report }) {
   return <Link href={`/reports/${report.id}`} data-testid={`link-report-${report.id}`} className="group flex items-center justify-between gap-4 rounded-xl p-3 transition-colors hover:bg-[hsl(var(--muted)/.55)]"><div className="flex min-w-0 items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><FileSearch className="h-4 w-4" /></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{incidentShort(report.incidentClass)}</p><p className="mt-0.5 truncate text-xs text-[hsl(var(--muted-foreground))]">{report.location || 'Location pending'} · {formatDate(report.createdAt)}</p></div></div><div className="flex shrink-0 items-center gap-3"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge><ArrowUpRight className="hidden h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:block" /></div></Link>;
 }
 
-function BarList({ items, colors }: { items: CountItem[]; colors: string[] }) {
+function BarList({ items, colors, showAll }: { items: CountItem[]; colors: string[]; showAll?: boolean }) {
   const max = Math.max(...items.map(i => i.count), 1);
-  return <div className="mt-4 space-y-3">{items.slice(0, 6).map((item, index) => <div key={item.label}><div className="mb-1.5 flex justify-between gap-3 text-xs"><span className="truncate text-[hsl(var(--muted-foreground))]">{incidentShort(item.label)}</span><span className="font-mono font-medium">{item.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--muted))]"><div className={cn('h-full rounded-full transition-all', colors[index % colors.length])} style={{ width: `${Math.max((item.count / max) * 100, 4)}%` }} /></div></div>)}</div>;
+  const shown = showAll ? items : items.slice(0, 6);
+  return <div className="mt-4 space-y-3">{shown.map((item, index) => <div key={item.label}><div className="mb-1.5 flex justify-between gap-3 text-xs"><span className="truncate text-[hsl(var(--muted-foreground))]">{incidentShort(item.label)}</span><span className="font-mono font-medium">{item.count}</span></div><div className="h-2 overflow-hidden rounded-full bg-[hsl(var(--muted))]"><div className={cn('h-full rounded-full transition-all', colors[index % colors.length])} style={{ width: `${Math.max((item.count / max) * 100, 4)}%` }} /></div></div>)}</div>;
 }
 
 function Analyze() {
@@ -552,18 +553,362 @@ function Locations() {
   );
 }
 
-function Analytics() {
-  const analytics = useGetAnalyticsSummary();
-  const data = analytics.data;
-  const max = data ? Math.max(...data.byLocation.map(i => i.count), 1) : 1;
-  return <><PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." />{analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label="Total reports" value={data.byIncidentClass.reduce((s, i) => s + i.count, 0)} note="Reports in current dataset" icon={ClipboardList} tone="amber" /></div><div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div><div className="mt-6"><ChartPanel title="Reports by location" subtitle="Current saved dataset"><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel></div><Evaluation data={data.evaluation} /></> : null}</>;
+// ─── Analytics filters type ────────────────────────────────────────────────
+type AnalyticsFilters = {
+  incidentClass: string;
+  priority: string;
+  location: string;
+  peopleAtRisk: string;
+  dateFrom: string;
+  dateTo: string;
+};
+
+const EMPTY_FILTERS: AnalyticsFilters = { incidentClass: '', priority: '', location: '', peopleAtRisk: '', dateFrom: '', dateTo: '' };
+
+function useAnalyticsData(filters: AnalyticsFilters) {
+  const params = new URLSearchParams();
+  if (filters.incidentClass) params.set('incidentClass', filters.incidentClass);
+  if (filters.priority)      params.set('priority', filters.priority);
+  if (filters.location)      params.set('location', filters.location);
+  if (filters.peopleAtRisk)  params.set('peopleAtRisk', filters.peopleAtRisk);
+  if (filters.dateFrom)      params.set('dateFrom', filters.dateFrom);
+  if (filters.dateTo)        params.set('dateTo', filters.dateTo);
+  const qs = params.toString();
+  return useQuery({
+    queryKey: ['analytics-summary', qs],
+    queryFn: async ({ signal }) => {
+      const url = `/api/analytics/summary${qs ? `?${qs}` : ''}`;
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error('Failed to fetch analytics');
+      return res.json() as Promise<import('@workspace/api-client-react').AnalyticsSummary & { totalFiltered?: number }>;
+    },
+  });
 }
 
-function ChartPanel({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) { return <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{subtitle}</p>{children}</section>; }
+// ─── Export helpers ────────────────────────────────────────────────────────
+function exportCSV(rows: Array<Record<string, unknown>>, filename: string) {
+  if (!rows.length) return;
+  const cols = Object.keys(rows[0]);
+  const lines = [cols.join(','), ...rows.map(r => cols.map(c => JSON.stringify(r[c] ?? '')).join(','))];
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+}
+
+function exportJSON(data: unknown, filename: string) {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+}
+
+// ─── Analytics component ───────────────────────────────────────────────────
+function Analytics() {
+  const [filters, setFilters] = useState<AnalyticsFilters>(EMPTY_FILTERS);
+  const [pending, setPending] = useState<AnalyticsFilters>(EMPTY_FILTERS);
+  const [showFilters, setShowFilters] = useState(true);
+
+  const analytics = useAnalyticsData(filters);
+  const data = analytics.data;
+
+  const hasActiveFilters = Object.values(filters).some(Boolean);
+  const totalShown = data ? (data.totalFiltered ?? data.byIncidentClass.reduce((s, i) => s + i.count, 0)) : 0;
+  const maxLoc = data ? Math.max(...data.byLocation.map(i => i.count), 1) : 1;
+  const maxSup = data ? Math.max(...data.bySupport.map(i => i.count), 1) : 1;
+
+  const apply = () => setFilters({ ...pending });
+  const clear = () => { setPending(EMPTY_FILTERS); setFilters(EMPTY_FILTERS); };
+
+  const handleExportCSV = () => {
+    if (!data) return;
+    const rows = [
+      ...data.byIncidentClass.map(r => ({ category: 'Incident Class', label: r.label, count: r.count })),
+      ...data.byPriority.map(r => ({ category: 'Priority', label: r.label, count: r.count })),
+      ...data.byLocation.map(r => ({ category: 'Location', label: r.label, count: r.count })),
+      ...data.bySupport.map(r => ({ category: 'Required Support', label: r.label, count: r.count })),
+      { category: 'Summary', label: 'People at Risk', count: data.peopleAtRisk },
+      { category: 'Summary', label: 'Total Reports', count: totalShown },
+    ];
+    exportCSV(rows, `balaagh-analytics-${new Date().toISOString().slice(0,10)}.csv`);
+  };
+
+  const handleExportJSON = () => {
+    if (!data) return;
+    exportJSON({ generatedAt: new Date().toISOString(), filters, data }, `balaagh-analytics-${new Date().toISOString().slice(0,10)}.json`);
+  };
+
+  return (
+    <>
+      {/* Header */}
+      <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />Pattern review
+          </p>
+          <h1 className="text-3xl font-semibold tracking-[-.03em] sm:text-4xl">Analytics</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+            Explore classification and distribution patterns. Use filters to drill into any segment, then export a report.
+          </p>
+        </div>
+        {/* Export buttons */}
+        <div className="flex shrink-0 gap-2">
+          <Button variant="outline" onClick={handleExportCSV} disabled={!data} className="text-xs">
+            <ArrowUpRight className="h-3.5 w-3.5" /> Export CSV
+          </Button>
+          <Button variant="outline" onClick={handleExportJSON} disabled={!data} className="text-xs">
+            <ArrowUpRight className="h-3.5 w-3.5" /> Export JSON
+          </Button>
+        </div>
+      </div>
+
+      {/* Filter panel */}
+      <section className="mb-6 rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-[hsl(var(--primary))]" />
+            <span className="text-sm font-semibold">Filters</span>
+            {hasActiveFilters && (
+              <span className="rounded-full bg-[hsl(var(--primary))] px-2 py-0.5 text-[10px] font-bold text-white">Active</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && <Button variant="ghost" onClick={clear} className="h-8 px-3 text-xs"><X className="h-3.5 w-3.5" /> Clear all</Button>}
+            <Button variant="ghost" onClick={() => setShowFilters(v => !v)} className="h-8 px-3 text-xs">
+              <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', showFilters && 'rotate-180')} />
+              {showFilters ? 'Hide' : 'Show'}
+            </Button>
+          </div>
+        </div>
+
+        {showFilters && (
+          <div className="mt-4 border-t border-[hsl(var(--border))] pt-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+              {/* Incident class */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Incident class</label>
+                <select value={pending.incidentClass} onChange={e => setPending(p => ({ ...p, incidentClass: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]">
+                  <option value="">All classes</option>
+                  {incidentClasses.map(v => <option key={v} value={v}>{incidentShort(v)}</option>)}
+                </select>
+              </div>
+
+              {/* Priority */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Priority</label>
+                <select value={pending.priority} onChange={e => setPending(p => ({ ...p, priority: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]">
+                  <option value="">All priorities</option>
+                  {priorities.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+
+              {/* Location */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Location</label>
+                <select value={pending.location} onChange={e => setPending(p => ({ ...p, location: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]">
+                  <option value="">All locations</option>
+                  {libyanLocations.map(v => <option key={v} value={v}>{v}</option>)}
+                </select>
+              </div>
+
+              {/* People at risk */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">People at risk</label>
+                <select value={pending.peopleAtRisk} onChange={e => setPending(p => ({ ...p, peopleAtRisk: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]">
+                  <option value="">All reports</option>
+                  <option value="true">At risk only</option>
+                  <option value="false">No risk</option>
+                </select>
+              </div>
+
+              {/* Date from */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">From date</label>
+                <input type="date" value={pending.dateFrom} onChange={e => setPending(p => ({ ...p, dateFrom: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]" />
+              </div>
+
+              {/* Date to */}
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">To date</label>
+                <input type="date" value={pending.dateTo} onChange={e => setPending(p => ({ ...p, dateTo: e.target.value }))}
+                  className="h-9 rounded-lg border border-[hsl(var(--input))] bg-white px-2.5 text-xs outline-none focus:border-[hsl(var(--accent))]" />
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2">
+              <Button onClick={apply} className="h-9 px-5 text-xs">
+                <Search className="h-3.5 w-3.5" /> Apply filters
+              </Button>
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">
+                {hasActiveFilters ? `Showing filtered results` : 'Showing all reports'}
+              </span>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Content */}
+      {analytics.isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div>
+      ) : analytics.isError ? (
+        <ErrorPanel onRetry={() => analytics.refetch()} />
+      ) : data ? (
+        <>
+          {/* KPI row */}
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard label="Total reports" value={totalShown} note={hasActiveFilters ? 'Matching current filters' : 'In current dataset'} icon={ClipboardList} tone="amber" />
+            <StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" />
+            <StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented" icon={BarChart3} tone="blue" />
+            <StatCard label="Locations" value={data.byLocation.length} note="Areas represented" icon={MapPin} tone="teal" />
+          </div>
+
+          {/* Incident + Priority */}
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <ChartPanel title="Incident class distribution" subtitle="Reports per incident type">
+              <BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} showAll />
+            </ChartPanel>
+            <ChartPanel title="Priority distribution" subtitle="Urgency levels across filtered reports">
+              <BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} showAll />
+            </ChartPanel>
+          </div>
+
+          {/* Location */}
+          <div className="mt-6">
+            <ChartPanel title="Reports by location" subtitle="Geographic breakdown of filtered reports">
+              <div className="mt-5 space-y-3">
+                {data.byLocation.length === 0
+                  ? <p className="text-sm text-[hsl(var(--muted-foreground))]">No location data for current filters.</p>
+                  : data.byLocation.map(item => (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <span className="w-32 shrink-0 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span>
+                      <div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]">
+                        <div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white transition-all"
+                          style={{ width: `${Math.max(6, item.count / maxLoc * 100)}%` }}>
+                          {item.count}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </ChartPanel>
+          </div>
+
+          {/* Required support */}
+          <div className="mt-6">
+            <ChartPanel title="Required support breakdown" subtitle="Types of support needed across reports">
+              <div className="mt-5 space-y-3">
+                {data.bySupport.length === 0
+                  ? <p className="text-sm text-[hsl(var(--muted-foreground))]">No support data for current filters.</p>
+                  : data.bySupport.map(item => (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <span className="w-44 shrink-0 truncate text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(item.label)}</span>
+                      <div className="h-7 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]">
+                        <div className="flex h-full items-center rounded-md bg-teal-500 px-2 text-xs font-bold text-white transition-all"
+                          style={{ width: `${Math.max(6, item.count / maxSup * 100)}%` }}>
+                          {item.count}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </ChartPanel>
+          </div>
+
+          {/* People at risk summary */}
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
+              <p className="text-xs font-bold uppercase tracking-[.12em] text-red-700">People at Risk</p>
+              <p className="mt-3 font-mono text-4xl font-medium text-red-700">{data.peopleAtRisk}</p>
+              <p className="mt-2 text-xs text-red-600">reports flagging potential risk</p>
+            </div>
+            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
+              <p className="text-xs font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Safe / No Risk</p>
+              <p className="mt-3 font-mono text-4xl font-medium">{totalShown - data.peopleAtRisk}</p>
+              <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">reports with no identified risk</p>
+            </div>
+            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
+              <p className="text-xs font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Risk Rate</p>
+              <p className="mt-3 font-mono text-4xl font-medium">{totalShown ? `${((data.peopleAtRisk / totalShown) * 100).toFixed(0)}%` : '—'}</p>
+              <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">of filtered reports</p>
+            </div>
+          </div>
+
+          <Evaluation data={data.evaluation} />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+function ChartPanel({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) {
+  return (
+    <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6">
+      <h2 className="font-semibold">{title}</h2>
+      <p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{subtitle}</p>
+      {children}
+    </section>
+  );
+}
 
 function Evaluation({ data }: { data: { accuracy: number; precision: number; recall: number; macroF1: number; confusionMatrix: number[][] } }) {
   const metrics = [['Accuracy', data.accuracy], ['Precision', data.precision], ['Recall', data.recall], ['Macro F1', data.macroF1]];
-  return <section className="mt-6 rounded-2xl border border-[hsl(var(--accent)/.3)] bg-[hsl(var(--secondary)/.38)] p-5 sm:p-7"><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-[hsl(var(--primary))]" /><p className="font-mono text-xs font-medium uppercase tracking-[.15em] text-[hsl(var(--primary))]">Model Evaluation</p></div><h2 className="mt-2 text-xl font-semibold">Evaluation metrics</h2><p className="mt-1 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">Model evaluation metrics for the current classification configuration. Results reflect the current dataset and should be interpreted alongside qualitative review.</p></div><Badge className="w-fit border-[hsl(var(--accent)/.35)] bg-white text-[hsl(var(--primary))]"><CircleHelp className="mr-1 h-3 w-3" /> Current dataset</Badge></div><div className="mt-6 grid gap-3 sm:grid-cols-4">{metrics.map(([label, value]) => <div key={label} className="rounded-xl border border-[hsl(var(--accent)/.22)] bg-white/70 p-4"><p className="text-xs text-[hsl(var(--muted-foreground))]">{label}</p><p className="mt-2 font-mono text-2xl font-medium text-[hsl(var(--primary))]">{typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : value}</p></div>)}</div><div className="mt-6"><p className="text-xs font-semibold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Confusion matrix</p><div className="mt-3 flex max-w-full overflow-x-auto"><div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${Math.max(data.confusionMatrix?.[0]?.length || 1, 1)}, minmax(36px, 1fr))` }}>{(data.confusionMatrix || []).flatMap((row, ri) => row.map((value, ci) => <div key={`${ri}-${ci}`} className="flex h-9 items-center justify-center rounded bg-[hsl(var(--primary)/.1)] font-mono text-xs" style={{ opacity: Math.max(.35, Math.min(1, value / 10)) }}>{value}</div>))}</div></div></div></section>;
+  const classLabels = ['Fire', 'Flood', 'Infra', 'Other', 'People', 'Road'];
+  return (
+    <section className="mt-6 rounded-2xl border border-[hsl(var(--accent)/.3)] bg-[hsl(var(--secondary)/.38)] p-5 sm:p-7">
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[hsl(var(--primary))]" />
+            <p className="font-mono text-xs font-medium uppercase tracking-[.15em] text-[hsl(var(--primary))]">Model Evaluation</p>
+          </div>
+          <h2 className="mt-2 text-xl font-semibold">Evaluation metrics</h2>
+          <p className="mt-1 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">
+            Model evaluation metrics for the current classification configuration. Results reflect the current dataset and should be interpreted alongside qualitative review.
+          </p>
+        </div>
+        <Badge className="w-fit border-[hsl(var(--accent)/.35)] bg-white text-[hsl(var(--primary))]">
+          <CircleHelp className="mr-1 h-3 w-3" /> Current dataset
+        </Badge>
+      </div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-4">
+        {metrics.map(([label, value]) => (
+          <div key={String(label)} className="rounded-xl border border-[hsl(var(--accent)/.22)] bg-white/70 p-4">
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">{label}</p>
+            <p className="mt-2 font-mono text-2xl font-medium text-[hsl(var(--primary))]">
+              {typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : value}
+            </p>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6">
+        <p className="text-xs font-semibold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Confusion matrix</p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="text-xs">
+            <thead>
+              <tr>
+                <th className="pr-2 text-right text-[hsl(var(--muted-foreground))]">True ↓ / Pred →</th>
+                {classLabels.map(l => <th key={l} className="w-10 text-center font-mono text-[hsl(var(--muted-foreground))]">{l}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {(data.confusionMatrix || []).map((row, ri) => (
+                <tr key={ri}>
+                  <td className="pr-2 text-right font-mono text-[hsl(var(--muted-foreground))]">{classLabels[ri]}</td>
+                  {row.map((val, ci) => (
+                    <td key={ci} className={cn(
+                      'w-10 rounded py-1 text-center font-mono font-medium',
+                      ri === ci ? 'bg-[hsl(var(--primary)/.18)] text-[hsl(var(--primary))]' : 'bg-[hsl(var(--muted)/.6)] text-[hsl(var(--muted-foreground))]'
+                    )}>{val}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function About() {

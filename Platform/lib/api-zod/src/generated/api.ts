@@ -209,6 +209,15 @@ export const GetLocationsSummaryResponse = zod.object({
 /**
  * @summary Get analytics and demo model evaluation
  */
+export const GetAnalyticsSummaryQueryParams = zod.object({
+  "incidentClass": zod.enum(['Fire / Explosion', 'Flood / Severe Weather', 'Infrastructure / Utilities', 'Road / Transportation', 'People at Risk / Medical', 'Other']).optional(),
+  "priority": zod.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
+  "location": zod.coerce.string().optional(),
+  "peopleAtRisk": zod.enum(['true', 'false']).optional(),
+  "dateFrom": zod.coerce.string().optional(),
+  "dateTo": zod.coerce.string().optional(),
+})
+
 export const GetAnalyticsSummaryResponse = zod.object({
   "byIncidentClass": zod.array(zod.object({
   "label": zod.string(),
@@ -227,6 +236,7 @@ export const GetAnalyticsSummaryResponse = zod.object({
   "count": zod.number().int()
 })),
   "peopleAtRisk": zod.number().int(),
+  "totalFiltered": zod.number().int().optional(),
   "evaluation": zod.object({
   "accuracy": zod.number(),
   "precision": zod.number(),
