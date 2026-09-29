@@ -104,7 +104,8 @@ if (isStatic) {
         // Single report — fetch from reports.json and filter
         const id = Number(path.split('/').pop());
         const res = await originalFetch(`${base}/data/reports.json`, init);
-        const all = await res.json();
+        const rawAll = await res.json();
+        const all = Array.isArray(rawAll) ? rawAll : (rawAll?.value ?? []);
         const report = all.find((r: { id: number }) => r.id === id);
         if (!report) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 });
         return new Response(JSON.stringify(report), { status: 200, headers: { 'Content-Type': 'application/json' } });
@@ -114,7 +115,9 @@ if (isStatic) {
         const fetchUrl = new URL(path, window.location.href);
         const params = fetchUrl.searchParams;
         const res = await originalFetch(`${base}/data/reports.json`, init);
-        let all: Record<string, unknown>[] = await res.json();
+        const raw = await res.json();
+        // Support both array and { value: [...] } shapes
+        let all: Record<string, unknown>[] = Array.isArray(raw) ? raw : (raw?.value ?? []);
 
         const search = params.get('search')?.toLowerCase();
         const incidentClass = params.get('incidentClass');
@@ -161,7 +164,8 @@ if (isStatic) {
           const fetchUrl = new URL(path, window.location.href);
           const params = fetchUrl.searchParams;
           const res = await originalFetch(`${base}/data/reports.json`, init);
-          let all: Record<string, unknown>[] = await res.json();
+          const rawAll = await res.json();
+          let all: Record<string, unknown>[] = Array.isArray(rawAll) ? rawAll : (rawAll?.value ?? []);
 
           const incidentClass = params.get('incidentClass');
           const priority = params.get('priority');
