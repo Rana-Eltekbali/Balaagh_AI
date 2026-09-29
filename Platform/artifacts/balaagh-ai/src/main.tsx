@@ -93,7 +93,11 @@ if (isStatic) {
       if (path === '/api/dashboard/summary')  file = `${base}/data/dashboard-summary.json`;
       else if (path === '/api/analytics/summary' || path.startsWith('/api/analytics/summary')) file = `${base}/data/analytics-summary.json`;
       else if (path === '/api/locations/summary') file = `${base}/data/locations-summary.json`;
-      // POST /api/reports/analyze — MUST come before the generic /api/reports handler
+      // Special sub-routes MUST come before generic /api/reports handler
+      else if (path === '/api/reports/edits') {
+        // No edits in static mode
+        return new Response(JSON.stringify([]), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      }
       else if (path.startsWith('/api/reports/analyze')) {
         let text = '';
         try { text = JSON.parse(init?.body as string)?.text ?? ''; } catch { /* ignore */ }
@@ -110,11 +114,11 @@ if (isStatic) {
         if (!report) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 });
         return new Response(JSON.stringify(report), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
-      else if (path === '/api/reports' || path.startsWith('/api/reports?')) {
-        // List reports — fetch from reports.json and apply basic filters
+      else if ((path === '/api/reports' || path.startsWith('/api/reports?')) && (!init?.method || init.method.toUpperCase() === 'GET')) {
+        // GET: List reports — fetch from reports.json and apply basic filters
         const fetchUrl = new URL(path, window.location.href);
         const params = fetchUrl.searchParams;
-        const res = await originalFetch(`${base}/data/reports.json`, init);
+        const res = await originalFetch(`${base}/data/reports.json`);
         const raw = await res.json();
         // Support both array and { value: [...] } shapes
         let all: Record<string, unknown>[] = Array.isArray(raw) ? raw : (raw?.value ?? []);
@@ -140,7 +144,7 @@ if (isStatic) {
         return new Response(JSON.stringify(all), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
       // POST /api/reports — store the new report in sessionStorage so it persists within the tab
-      else if (path === '/api/reports' && (!init?.method || init.method.toUpperCase() === 'POST')) {
+      else if (path === '/api/reports' && init?.method?.toUpperCase() === 'POST') {
         let body: Record<string, unknown> = {};
         try { body = JSON.parse(init?.body as string); } catch { /* ignore */ }
         const now = new Date().toISOString();
