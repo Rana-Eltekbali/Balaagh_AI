@@ -323,8 +323,6 @@ function DetailContent({ report }: { report: Report }) {
           <div className="space-y-4">
             <KeyValue label="Incident class" value={report.incidentClass} />
             <KeyValue label="Location" value={report.location || 'Not identified'} />
-            <KeyValue label="Required support" value={report.requiredSupport || 'Not identified'} />
-            <KeyValue label="People at risk" value={report.peopleAtRisk ? 'Potentially identified' : 'Not identified'} />
             <div className="border-t border-[hsl(var(--border))] pt-4">
               <p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Summary</p>
               <p className="mt-2 text-sm leading-6">{report.summary}</p>
