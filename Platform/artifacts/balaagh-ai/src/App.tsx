@@ -771,26 +771,7 @@ function Analytics() {
 
 
 
-          {/* Required support */}
-          <div className="mt-6">
-            <ChartPanel title="Required support breakdown" subtitle="Types of support needed across reports">
-              <div className="mt-5 space-y-3">
-                {data.bySupport.length === 0
-                  ? <p className="text-sm text-[hsl(var(--muted-foreground))]">No support data for current filters.</p>
-                  : data.bySupport.map(item => (
-                    <div key={item.label} className="flex items-center gap-3">
-                      <span className="w-44 shrink-0 truncate text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(item.label)}</span>
-                      <div className="h-7 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]">
-                        <div className="flex h-full items-center rounded-md bg-teal-500 px-2 text-xs font-bold text-white transition-all"
-                          style={{ width: `${Math.max(6, item.count / maxSup * 100)}%` }}>
-                          {item.count}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </ChartPanel>
-          </div>
+
 
 
 
