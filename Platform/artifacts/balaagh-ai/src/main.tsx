@@ -118,11 +118,17 @@ if (isStatic) {
         const result = staticAnalyzeText(text);
         return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
-      else if (path.match(/^\/api\/reports\/\d+$/) && init?.method?.toUpperCase() === 'DELETE') {
-        // DELETE /api/reports/:id — return 204 No Content (void response expected by customFetch)
+      else if (path.match(/^\/api\/reports\/\d+/) && init?.method?.toUpperCase() === 'DELETE') {
+        // DELETE /api/reports/:id — track deleted IDs in sessionStorage, return 204
+        const id = Number(path.match(/\/api\/reports\/(\d+)/)?.[1]);
+        try {
+          const deleted: number[] = JSON.parse(sessionStorage.getItem('static_deleted_ids') ?? '[]');
+          if (!deleted.includes(id)) deleted.push(id);
+          sessionStorage.setItem('static_deleted_ids', JSON.stringify(deleted));
+        } catch { /* ignore */ }
         return new Response(null, { status: 204 });
       }
-      else if (path.match(/^\/api\/reports\/\d+$/) && init?.method?.toUpperCase() === 'PATCH') {
+      else if (path.match(/^\/api\/reports\/\d+/) && init?.method?.toUpperCase() === 'PATCH') {
         // PATCH /api/reports/:id — merge update into existing report and return full Report object
         const id = Number(path.split('/').pop());
         let updates: Record<string, unknown> = {};
@@ -147,9 +153,14 @@ if (isStatic) {
           return new Response(JSON.stringify(merged), { status: 200, headers: { 'Content-Type': 'application/json' } });
         }
       }
-      else if (path.match(/^\/api\/reports\/\d+$/)) {
+      else if (path.match(/^\/api\/reports\/\d+/)) {
         // GET /api/reports/:id — fetch from reports.json
-        const id = Number(path.split('/').pop());
+        const id = Number(path.match(/\/api\/reports\/(\d+)/)?.[1]);
+        // Check if deleted
+        try {
+          const deleted: number[] = JSON.parse(sessionStorage.getItem('static_deleted_ids') ?? '[]');
+          if (deleted.includes(id)) return new Response(JSON.stringify({ error: 'Not found' }), { status: 404 });
+        } catch { /* ignore */ }
         const res = await originalFetch(`${base}/data/reports.json`);
         const rawAll = await res.json();
         const all = Array.isArray(rawAll) ? rawAll : (rawAll?.value ?? []);
@@ -165,6 +176,11 @@ if (isStatic) {
         const raw = await res.json();
         // Support both array and { value: [...] } shapes
         let all: Record<string, unknown>[] = Array.isArray(raw) ? raw : (raw?.value ?? []);
+        // Filter out deleted reports
+        try {
+          const deleted: number[] = JSON.parse(sessionStorage.getItem('static_deleted_ids') ?? '[]');
+          if (deleted.length) all = all.filter(r => !deleted.includes(r.id as number));
+        } catch { /* ignore */ }
 
         const search = params.get('search')?.toLowerCase();
         const incidentClass = params.get('incidentClass');
