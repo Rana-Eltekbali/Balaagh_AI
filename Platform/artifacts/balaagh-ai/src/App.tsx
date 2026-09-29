@@ -796,24 +796,7 @@ function Analytics() {
             </ChartPanel>
           </div>
 
-          {/* People at risk summary */}
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-5">
-              <p className="text-xs font-bold uppercase tracking-[.12em] text-red-700">People at Risk</p>
-              <p className="mt-3 font-mono text-4xl font-medium text-red-700">{data.peopleAtRisk}</p>
-              <p className="mt-2 text-xs text-red-600">reports flagging potential risk</p>
-            </div>
-            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
-              <p className="text-xs font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Safe / No Risk</p>
-              <p className="mt-3 font-mono text-4xl font-medium">{totalShown - data.peopleAtRisk}</p>
-              <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">reports with no identified risk</p>
-            </div>
-            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
-              <p className="text-xs font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Risk Rate</p>
-              <p className="mt-3 font-mono text-4xl font-medium">{totalShown ? `${((data.peopleAtRisk / totalShown) * 100).toFixed(0)}%` : '—'}</p>
-              <p className="mt-2 text-xs text-[hsl(var(--muted-foreground))]">of filtered reports</p>
-            </div>
-          </div>
+
 
 
         </>
