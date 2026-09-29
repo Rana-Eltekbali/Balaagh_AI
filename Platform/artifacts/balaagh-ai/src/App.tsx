@@ -756,10 +756,9 @@ function Analytics() {
       ) : data ? (
         <>
           {/* KPI row */}
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Total reports" value={totalShown} note={hasActiveFilters ? 'Matching current filters' : 'In current dataset'} icon={ClipboardList} tone="amber" />
-            <StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" />
-<StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented" icon={BarChart3} tone="blue" />
+            <StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented" icon={BarChart3} tone="blue" />
             <StatCard label="Locations" value={data.byLocation.length} note="Areas represented" icon={MapPin} tone="teal" />
           </div>
 
