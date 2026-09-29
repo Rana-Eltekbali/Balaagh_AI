@@ -4,9 +4,7 @@ import {
   GetAnalyticsSummaryResponse,
   GetLocationsSummaryResponse,
 } from "@workspace/api-zod";
-import { db, reportsTable } from "@workspace/db";
-import { desc } from "drizzle-orm";
-import { ensureDemoReports, toApiReport } from "./reports";
+import * as store from "../lib/store";
 
 const router: IRouter = Router();
 
@@ -19,35 +17,30 @@ function countBy(items: string[]) {
 }
 
 router.get("/dashboard/summary", async (_req, res): Promise<void> => {
-  await ensureDemoReports();
-  const reports = await db.select().from(reportsTable).orderBy(desc(reportsTable.createdAt));
-  const now = new Date();
-  const reportsToday = reports.filter((report) => {
-    const date = new Date(report.createdAt);
-    return date.toDateString() === now.toDateString();
-  }).length;
+  const reports = store.getAll();
+  const now = new Date().toDateString();
+  const reportsToday = reports.filter((r) => new Date(r.createdAt).toDateString() === now).length;
 
   res.json(GetDashboardSummaryResponse.parse({
     totalReports: reports.length,
-    criticalReports: reports.filter((report) => report.priority === "Critical").length,
-    highPriority: reports.filter((report) => report.priority === "High").length,
+    criticalReports: reports.filter((r) => r.priority === "Critical").length,
+    highPriority: reports.filter((r) => r.priority === "High").length,
     reportsToday,
-    recentReports: reports.slice(0, 6).map(toApiReport),
-    byIncidentClass: countBy(reports.map((report) => report.incidentClass)),
-    byPriority: countBy(reports.map((report) => report.priority)),
+    recentReports: reports.slice(0, 6),
+    byIncidentClass: countBy(reports.map((r) => r.incidentClass)),
+    byPriority: countBy(reports.map((r) => r.priority)),
   }));
 });
 
 router.get("/locations/summary", async (_req, res): Promise<void> => {
-  await ensureDemoReports();
-  const reports = await db.select().from(reportsTable);
-  const locations = [...new Set(reports.map((report) => report.location))].map((location) => {
-    const locationReports = reports.filter((report) => report.location === location);
+  const reports = store.getAll();
+  const locations = [...new Set(reports.map((r) => r.location))].map((location) => {
+    const loc = reports.filter((r) => r.location === location);
     return {
       location,
-      reports: locationReports.length,
-      criticalReports: locationReports.filter((report) => report.priority === "Critical").length,
-      peopleAtRisk: locationReports.filter((report) => report.peopleAtRisk).length,
+      reports: loc.length,
+      criticalReports: loc.filter((r) => r.priority === "Critical").length,
+      peopleAtRisk: loc.filter((r) => r.peopleAtRisk).length,
     };
   }).sort((a, b) => b.reports - a.reports);
 
@@ -55,15 +48,13 @@ router.get("/locations/summary", async (_req, res): Promise<void> => {
 });
 
 router.get("/analytics/summary", async (_req, res): Promise<void> => {
-  await ensureDemoReports();
-  const reports = await db.select().from(reportsTable);
-  const locations = countBy(reports.map((report) => report.location));
+  const reports = store.getAll();
   res.json(GetAnalyticsSummaryResponse.parse({
-    byIncidentClass: countBy(reports.map((report) => report.incidentClass)),
-    byPriority: countBy(reports.map((report) => report.priority)),
-    byLocation: locations,
-    bySupport: countBy(reports.map((report) => report.requiredSupport)),
-    peopleAtRisk: reports.filter((report) => report.peopleAtRisk).length,
+    byIncidentClass: countBy(reports.map((r) => r.incidentClass)),
+    byPriority: countBy(reports.map((r) => r.priority)),
+    byLocation: countBy(reports.map((r) => r.location)),
+    bySupport: countBy(reports.map((r) => r.requiredSupport)),
+    peopleAtRisk: reports.filter((r) => r.peopleAtRisk).length,
     evaluation: {
       accuracy: 0.86,
       precision: 0.82,

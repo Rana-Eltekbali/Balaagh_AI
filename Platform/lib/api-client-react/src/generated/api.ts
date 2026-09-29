@@ -28,7 +28,8 @@ import type {
   ListReportsParams,
   LocationsSummary,
   Report,
-  ReportInput
+  ReportInput,
+  ReportUpdate
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -472,6 +473,95 @@ export function useGetReport<TData = Awaited<ReturnType<typeof getReport>>, TErr
 
 
 
+
+export const getUpdateReportUrl = (id: number,) => {
+
+
+
+
+  return `/api/reports/${id}`
+}
+
+/**
+ * @summary Update a saved report's fields
+ */
+export const updateReport = async (id: number,
+    reportUpdate: ReportUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Report> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Report>(getUpdateReportUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reportUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateReportMutationKey = () => ['updateReport'] as const;
+
+export const getUpdateReportMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,UpdateReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,UpdateReportMutationVariables, TContext> => {
+
+const mutationKey = getUpdateReportMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateReport>>, UpdateReportMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateReport(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateReportMutationResult = NonNullable<Awaited<ReturnType<typeof updateReport>>>
+    export type UpdateReportMutationBody = BodyType<ReportUpdate>
+    export type UpdateReportMutationError = ErrorType<void>
+    export type UpdateReportMutationVariables = {id: number;data: BodyType<ReportUpdate>}
+
+    /**
+ * @summary Update a saved report's fields
+ */
+export const useUpdateReport = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReport>>, TError,UpdateReportMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateReport>>,
+        TError,
+        UpdateReportMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateReportMutationOptions(options));
+    }
 
 export const getDeleteReportUrl = (id: number,) => {
 

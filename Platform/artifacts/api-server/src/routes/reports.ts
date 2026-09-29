@@ -1,5 +1,4 @@
 import { Router, type IRouter } from "express";
-import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
 import {
   AnalyzeReportBody,
   AnalyzeReportResponse,
@@ -10,32 +9,14 @@ import {
   GetReportResponse,
   ListReportsQueryParams,
   ListReportsResponse,
+  UpdateReportBody,
+  UpdateReportParams,
+  UpdateReportResponse,
 } from "@workspace/api-zod";
-import { db, reportsTable, type Report } from "@workspace/db";
 import { analyzeReportText } from "../lib/report-analysis";
-import { demoReports } from "../lib/demo-reports";
+import * as store from "../lib/store";
 
 const router: IRouter = Router();
-let seedPromise: Promise<void> | undefined;
-
-function toApiReport(report: Report) {
-  return {
-    ...report,
-    createdAt: report.createdAt.toISOString(),
-  };
-}
-
-async function ensureDemoReports(): Promise<void> {
-  if (!seedPromise) {
-    seedPromise = (async () => {
-      const existing = await db.select({ id: reportsTable.id }).from(reportsTable).limit(1);
-      if (existing.length === 0) {
-        await db.insert(reportsTable).values(demoReports);
-      }
-    })();
-  }
-  await seedPromise;
-}
 
 router.post("/reports/analyze", async (req, res): Promise<void> => {
   const parsed = AnalyzeReportBody.safeParse(req.body);
@@ -47,31 +28,36 @@ router.post("/reports/analyze", async (req, res): Promise<void> => {
 });
 
 router.get("/reports", async (req, res): Promise<void> => {
-  await ensureDemoReports();
   const parsed = ListReportsQueryParams.safeParse(req.query);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { search, incidentClass, priority, location, relevance, sort } = parsed.data;
-  const filters = [];
-  if (search) {
-    filters.push(or(ilike(reportsTable.originalText, `%${search}%`), ilike(reportsTable.summary, `%${search}%`)));
-  }
-  if (incidentClass) filters.push(eq(reportsTable.incidentClass, incidentClass));
-  if (priority) filters.push(eq(reportsTable.priority, priority));
-  if (location) filters.push(eq(reportsTable.location, location));
-  if (relevance) filters.push(eq(reportsTable.relevance, relevance));
+  const { search, incidentClass, priority, sort } = parsed.data;
 
-  const query = db.select().from(reportsTable);
-  const reports = await (filters.length ? query.where(and(...filters)) : query).orderBy(
-    sort === "incidentClass"
-      ? asc(reportsTable.incidentClass)
-      : sort === "priority"
-        ? asc(reportsTable.priority)
-        : desc(reportsTable.createdAt),
-  );
-  res.json(ListReportsResponse.parse(reports.map(toApiReport)));
+  let reports = store.getAll();
+
+  if (search) {
+    const q = search.toLowerCase();
+    reports = reports.filter(
+      (r) =>
+        r.originalText.toLowerCase().includes(q) ||
+        r.summary.toLowerCase().includes(q) ||
+        r.location.toLowerCase().includes(q),
+    );
+  }
+  if (incidentClass) reports = reports.filter((r) => r.incidentClass === incidentClass);
+  if (priority) reports = reports.filter((r) => r.priority === priority);
+
+  if (sort === "incidentClass") reports.sort((a, b) => a.incidentClass.localeCompare(b.incidentClass));
+  else if (sort === "priority") {
+    const order = ["Critical", "High", "Medium", "Low"];
+    reports.sort((a, b) => order.indexOf(a.priority) - order.indexOf(b.priority));
+  } else {
+    reports.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  res.json(ListReportsResponse.parse(reports));
 });
 
 router.post("/reports", async (req, res): Promise<void> => {
@@ -80,8 +66,8 @@ router.post("/reports", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const [created] = await db.insert(reportsTable).values(parsed.data).returning();
-  res.status(201).json(CreateReportResponse.parse(toApiReport(created)));
+  const created = store.insert(parsed.data);
+  res.status(201).json(CreateReportResponse.parse(created));
 });
 
 router.get("/reports/:id", async (req, res): Promise<void> => {
@@ -90,14 +76,33 @@ router.get("/reports/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  await ensureDemoReports();
-  const [report] = await db.select().from(reportsTable).where(eq(reportsTable.id, parsed.data.id));
+  const report = store.getById(parsed.data.id);
   if (!report) {
     res.status(404).json({ error: "Report not found" });
     return;
   }
-  res.json(GetReportResponse.parse(toApiReport(report)));
+  res.json(GetReportResponse.parse(report));
 });
+
+router.patch("/reports/:id", async (req, res): Promise<void> => {
+  const idParsed = UpdateReportParams.safeParse(req.params);
+  if (!idParsed.success) {
+    res.status(400).json({ error: idParsed.error.message });
+    return;
+  }
+  const bodyParsed = UpdateReportBody.safeParse(req.body);
+  if (!bodyParsed.success) {
+    res.status(400).json({ error: bodyParsed.error.message });
+    return;
+  }
+  const updated = store.update(idParsed.data.id, bodyParsed.data);
+  if (!updated) {
+    res.status(404).json({ error: "Report not found" });
+    return;
+  }
+  res.json(UpdateReportResponse.parse(updated));
+});
+
 
 router.delete("/reports/:id", async (req, res): Promise<void> => {
   const parsed = DeleteReportParams.safeParse(req.params);
@@ -105,14 +110,12 @@ router.delete("/reports/:id", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  await ensureDemoReports();
-  const deleted = await db.delete(reportsTable).where(eq(reportsTable.id, parsed.data.id)).returning({ id: reportsTable.id });
-  if (deleted.length === 0) {
+  const deleted = store.remove(parsed.data.id);
+  if (!deleted) {
     res.status(404).json({ error: "Report not found" });
     return;
   }
   res.sendStatus(204);
 });
 
-export { ensureDemoReports, toApiReport };
 export default router;

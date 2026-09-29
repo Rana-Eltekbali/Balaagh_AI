@@ -65,6 +65,15 @@ export interface ReportInput {
   summary: string;
 }
 
+export interface ReportUpdate {
+  incidentClass?: IncidentClass;
+  priority?: Priority;
+  location?: string;
+  peopleAtRisk?: boolean;
+  requiredSupport?: string;
+  summary?: string;
+}
+
 export interface AnalysisInput {
   /** @minLength 1 */
   text: string;

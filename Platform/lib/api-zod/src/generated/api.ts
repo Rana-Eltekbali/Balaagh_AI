@@ -121,6 +121,37 @@ export const GetReportResponse = zod.object({
 
 
 /**
+ * @summary Update a saved report's fields
+ */
+export const UpdateReportParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateReportBody = zod.object({
+  "incidentClass": zod.enum(['Fire / Explosion', 'Flood / Severe Weather', 'Infrastructure / Utilities', 'Road / Transportation', 'People at Risk / Medical', 'Other']).optional(),
+  "priority": zod.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
+  "location": zod.string().optional(),
+  "peopleAtRisk": zod.boolean().optional(),
+  "requiredSupport": zod.string().optional(),
+  "summary": zod.string().optional()
+})
+
+export const UpdateReportResponse = zod.object({
+  "id": zod.number().int(),
+  "originalText": zod.string(),
+  "incidentClass": zod.enum(['Fire / Explosion', 'Flood / Severe Weather', 'Infrastructure / Utilities', 'Road / Transportation', 'People at Risk / Medical', 'Other']),
+  "priority": zod.enum(['Low', 'Medium', 'High', 'Critical']),
+  "location": zod.string(),
+  "peopleAtRisk": zod.boolean(),
+  "requiredSupport": zod.string(),
+  "relevance": zod.enum(['Relevant', 'Irrelevant']),
+  "summary": zod.string(),
+  "createdAt": zod.string(),
+  "analysisTime": zod.string()
+})
+
+
+/**
  * @summary Delete a saved report
  */
 export const DeleteReportParams = zod.object({

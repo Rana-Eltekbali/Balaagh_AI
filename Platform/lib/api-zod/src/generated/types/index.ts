@@ -25,5 +25,6 @@ export * from './relevance';
 export * from './relevanceParameter';
 export * from './report';
 export * from './reportInput';
+export * from './reportUpdate';
 export * from './searchParameter';
 export * from './sortParameter';

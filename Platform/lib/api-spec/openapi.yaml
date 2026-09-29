@@ -102,6 +102,27 @@ paths:
                 $ref: "#/components/schemas/Report"
         "404":
           description: Report not found
+    patch:
+      operationId: updateReport
+      tags: [reports]
+      summary: Update a saved report's fields
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportUpdate"
+      responses:
+        "200":
+          description: Updated report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "404":
+          description: Report not found
     delete:
       operationId: deleteReport
       tags: [reports]
@@ -279,6 +300,21 @@ components:
           type: string
         relevance:
           $ref: "#/components/schemas/Relevance"
+        summary:
+          type: string
+    ReportUpdate:
+      type: object
+      properties:
+        incidentClass:
+          $ref: "#/components/schemas/IncidentClass"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        location:
+          type: string
+        peopleAtRisk:
+          type: boolean
+        requiredSupport:
+          type: string
         summary:
           type: string
     AnalysisInput:
