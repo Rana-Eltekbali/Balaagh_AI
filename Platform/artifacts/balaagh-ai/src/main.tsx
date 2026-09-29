@@ -73,7 +73,12 @@ function staticAnalyzeText(text: string) {
 // In production (GitHub Pages static deploy) we serve data from /data/*.json
 // because there is no server to run. A static mode flag is injected via
 // VITE_STATIC_MODE=true when building for GitHub Pages.
-const isStatic = import.meta.env.VITE_STATIC_MODE === 'true';
+const isStatic = import.meta.env.VITE_STATIC_MODE === 'true' ||
+  (typeof window !== 'undefined' && (
+    window.location.hostname.endsWith('github.io') ||
+    window.location.hostname.includes('github.io') ||
+    window.location.pathname.startsWith('/Balaagh_AI')
+  ));
 
 if (isStatic) {
   // Patch global fetch to intercept API calls and redirect them to static JSON files.
@@ -100,14 +105,52 @@ if (isStatic) {
       }
       else if (path.startsWith('/api/reports/analyze')) {
         let text = '';
-        try { text = JSON.parse(init?.body as string)?.text ?? ''; } catch { /* ignore */ }
+        if (typeof init?.body === 'string') {
+          try {
+            const parsed = JSON.parse(init.body);
+            text = parsed?.text || parsed?.data?.text || '';
+          } catch {
+            text = init.body;
+          }
+        } else if (init?.body && typeof init.body === 'object') {
+          text = (init.body as Record<string, unknown>)?.text as string || (init.body as Record<string, unknown>)?.data as string || '';
+        }
         const result = staticAnalyzeText(text);
         return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
-      else if (path.match(/^\/api\/reports\/\d+$/)) {
-        // Single report — fetch from reports.json and filter
+      else if (path.match(/^\/api\/reports\/\d+$/) && init?.method?.toUpperCase() === 'DELETE') {
+        // DELETE /api/reports/:id — return 204 No Content (void response expected by customFetch)
+        return new Response(null, { status: 204 });
+      }
+      else if (path.match(/^\/api\/reports\/\d+$/) && init?.method?.toUpperCase() === 'PATCH') {
+        // PATCH /api/reports/:id — merge update into existing report and return full Report object
         const id = Number(path.split('/').pop());
-        const res = await originalFetch(`${base}/data/reports.json`, init);
+        let updates: Record<string, unknown> = {};
+        try { updates = JSON.parse(init.body as string); } catch { /* ignore */ }
+        // Load base report from static JSON
+        const res = await originalFetch(`${base}/data/reports.json`);
+        const rawAll = await res.json();
+        const all: Record<string, unknown>[] = Array.isArray(rawAll) ? rawAll : (rawAll?.value ?? []);
+        const base_report = all.find((r: Record<string, unknown>) => r.id === id) ?? { id, createdAt: new Date().toISOString(), analysisTime: '0ms' };
+        // Also check sessionStorage for reports added this session
+        try {
+          const session: Record<string, unknown>[] = JSON.parse(sessionStorage.getItem('static_reports') ?? '[]');
+          const sessionReport = session.find((r: Record<string, unknown>) => r.id === id);
+          const merged = { ...base_report, ...(sessionReport ?? {}), ...updates };
+          // Persist update back to sessionStorage
+          const updatedSession = session.map((r: Record<string, unknown>) => r.id === id ? merged : r);
+          if (!session.some((r: Record<string, unknown>) => r.id === id)) updatedSession.push(merged);
+          sessionStorage.setItem('static_reports', JSON.stringify(updatedSession));
+          return new Response(JSON.stringify(merged), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        } catch {
+          const merged = { ...base_report, ...updates };
+          return new Response(JSON.stringify(merged), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        }
+      }
+      else if (path.match(/^\/api\/reports\/\d+$/)) {
+        // GET /api/reports/:id — fetch from reports.json
+        const id = Number(path.split('/').pop());
+        const res = await originalFetch(`${base}/data/reports.json`);
         const rawAll = await res.json();
         const all = Array.isArray(rawAll) ? rawAll : (rawAll?.value ?? []);
         const report = all.find((r: { id: number }) => r.id === id);
@@ -157,9 +200,9 @@ if (isStatic) {
         } catch { /* ignore */ }
         return new Response(JSON.stringify(report), { status: 201, headers: { 'Content-Type': 'application/json' } });
       }
-      // Other mutations (PATCH/DELETE) are no-ops in static mode
+      // Other POST mutations (not already handled above) are no-ops in static mode
       else if (init?.method && ['POST', 'PATCH', 'DELETE'].includes(init.method.toUpperCase())) {
-        return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+        return new Response(null, { status: 204 });
       }
 
       if (file) {
