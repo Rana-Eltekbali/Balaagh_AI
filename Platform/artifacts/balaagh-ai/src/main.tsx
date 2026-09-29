@@ -94,9 +94,9 @@ if (isStatic) {
       else if (path === '/api/analytics/summary' || path.startsWith('/api/analytics/summary')) file = `${base}/data/analytics-summary.json`;
       else if (path === '/api/locations/summary') file = `${base}/data/locations-summary.json`;
       // POST /api/reports/analyze — MUST come before the generic /api/reports handler
-      else if (path === '/api/reports/analyze' && init?.method?.toUpperCase() === 'POST') {
+      else if (path.startsWith('/api/reports/analyze')) {
         let text = '';
-        try { text = JSON.parse(init.body as string)?.text ?? ''; } catch { /* ignore */ }
+        try { text = JSON.parse(init?.body as string)?.text ?? ''; } catch { /* ignore */ }
         const result = staticAnalyzeText(text);
         return new Response(JSON.stringify(result), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
@@ -137,7 +137,7 @@ if (isStatic) {
         return new Response(JSON.stringify(all), { status: 200, headers: { 'Content-Type': 'application/json' } });
       }
       // POST /api/reports — store the new report in sessionStorage so it persists within the tab
-      else if (path === '/api/reports' && init?.method?.toUpperCase() === 'POST') {
+      else if (path === '/api/reports' && (!init?.method || init.method.toUpperCase() === 'POST')) {
         let body: Record<string, unknown> = {};
         try { body = JSON.parse(init.body as string); } catch { /* ignore */ }
         const id = Date.now();
