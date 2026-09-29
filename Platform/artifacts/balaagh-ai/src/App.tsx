@@ -277,7 +277,6 @@ function DetailContent({ report }: { report: Report }) {
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-semibold">Structured analysis</h2>
           <div className="flex items-center gap-2">
-            {!editing && <Badge className={priorityTone(report.priority)}>{report.priority}</Badge>}
             {editing
               ? <><Button variant="ghost" onClick={cancel} className="h-8 px-3 text-xs">Cancel</Button><Button onClick={save} disabled={update.isPending} className="h-8 px-3 text-xs">{update.isPending ? <><Loader2 className="h-3 w-3 animate-spin" /> Saving</> : <><Check className="h-3 w-3" /> Save changes</>}</Button></>
               : <Button variant="outline" onClick={() => setEditing(true)} className="h-8 px-3 text-xs"><Pencil className="h-3 w-3" /> Edit</Button>
@@ -323,6 +322,10 @@ function DetailContent({ report }: { report: Report }) {
           <div className="space-y-4">
             <KeyValue label="Incident class" value={report.incidentClass} />
             <KeyValue label="Location" value={report.location || 'Not identified'} />
+            <div className="flex items-center justify-between border-b border-[hsl(var(--border)/.7)] pb-3">
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">Priority</span>
+              <Badge className={priorityTone(report.priority)}>{report.priority}</Badge>
+            </div>
           </div>
         )}
       </section>
