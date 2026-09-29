@@ -139,9 +139,10 @@ if (isStatic) {
       // POST /api/reports — store the new report in sessionStorage so it persists within the tab
       else if (path === '/api/reports' && (!init?.method || init.method.toUpperCase() === 'POST')) {
         let body: Record<string, unknown> = {};
-        try { body = JSON.parse(init.body as string); } catch { /* ignore */ }
+        try { body = JSON.parse(init?.body as string); } catch { /* ignore */ }
+        const now = new Date().toISOString();
         const id = Date.now();
-        const report = { id, createdAt: new Date().toISOString(), ...body };
+        const report = { id, createdAt: now, analysisTime: '0ms', ...body };
         try {
           const existing = JSON.parse(sessionStorage.getItem('static_reports') ?? '[]');
           existing.unshift(report);
