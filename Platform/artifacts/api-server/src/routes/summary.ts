@@ -16,6 +16,20 @@ function countBy(items: string[]) {
     .sort((a, b) => b.count - a.count);
 }
 
+router.get("/reports/edits", async (_req, res): Promise<void> => {
+  const edits = store.getEdits();
+  const reports = store.getAll();
+  const enriched = edits.map((e) => {
+    const report = reports.find((r) => r.id === e.reportId);
+    return {
+      ...e,
+      originalText: report?.originalText ?? '',
+      incidentClass: report?.incidentClass ?? '',
+    };
+  }).reverse(); // أحدث أولاً
+  res.json(enriched);
+});
+
 router.get("/dashboard/summary", async (_req, res): Promise<void> => {
   const reports = store.getAll();
   const now = new Date().toDateString();
@@ -34,7 +48,7 @@ router.get("/dashboard/summary", async (_req, res): Promise<void> => {
 
 router.get("/locations/summary", async (_req, res): Promise<void> => {
   const reports = store.getAll();
-  const locations = [...new Set(reports.map((r) => r.location))].map((location) => {
+  const locations = [...new Set(reports.map((r) => r.location).filter(Boolean))].map((location) => {
     const loc = reports.filter((r) => r.location === location);
     return {
       location,
@@ -52,7 +66,7 @@ router.get("/analytics/summary", async (_req, res): Promise<void> => {
   res.json(GetAnalyticsSummaryResponse.parse({
     byIncidentClass: countBy(reports.map((r) => r.incidentClass)),
     byPriority: countBy(reports.map((r) => r.priority)),
-    byLocation: countBy(reports.map((r) => r.location)),
+    byLocation: countBy(reports.map((r) => r.location).filter(Boolean)),
     bySupport: countBy(reports.map((r) => r.requiredSupport)),
     peopleAtRisk: reports.filter((r) => r.peopleAtRisk).length,
     evaluation: {

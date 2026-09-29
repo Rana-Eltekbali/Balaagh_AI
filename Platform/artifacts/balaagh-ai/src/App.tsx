@@ -1,5 +1,7 @@
 import { type ReactNode, useState } from 'react';
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { MapContainer, TileLayer, CircleMarker, Tooltip as LeafletTooltip } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -19,6 +21,7 @@ import {
   useAnalyzeReport,
   useCreateReport,
   useDeleteReport,
+  useUpdateReport,
   useGetAnalyticsSummary,
   useGetDashboardSummary,
   useGetLocationsSummary,
@@ -42,6 +45,7 @@ import {
   Loader2,
   MapPin,
   Menu,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
@@ -105,19 +109,73 @@ function Shell({ children }: { children: ReactNode }) {
   const items = [
     { href: '/', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/analyze', label: 'Analyze report', icon: Sparkles },
-    { href: '/submit', label: 'Public intake', icon: Send },
     { href: '/reports', label: 'Saved reports', icon: ClipboardList },
     { href: '/locations', label: 'Locations', icon: MapPin },
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/about', label: 'About Project', icon: CircleHelp },
   ];
-  return <div className="app-shell min-h-[100dvh] text-[hsl(var(--foreground))]"><aside className={cn('fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))] px-4 py-5 transition-transform duration-300 lg:translate-x-0', mobileOpen ? 'translate-x-0' : '-translate-x-full')}><div className="flex items-center gap-3 px-3"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-5 w-5" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p><p className="text-[10px] uppercase tracking-[.2em] text-[hsl(var(--sidebar-foreground)/.62)]">AI-Powered Command Center</p></div></div><div className="my-8 h-px bg-[hsl(var(--sidebar-border))]" /><nav className="space-y-1">{items.map(item => { const active = item.href === '/' ? location === '/' : location.startsWith(item.href); const Icon = item.icon; return <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cn('group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors', active ? 'bg-[hsl(var(--sidebar-accent))] text-white' : 'text-[hsl(var(--sidebar-foreground)/.72)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-white')}><Icon className={cn('h-[18px] w-[18px]', active ? 'text-[hsl(var(--sidebar-primary))]' : 'text-[hsl(var(--sidebar-foreground)/.62)]')} />{item.label}{active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-[hsl(var(--sidebar-primary))]" />}</Link> })}</nav><div className="mt-auto" /></aside>{mobileOpen && <button aria-label="Close navigation" data-testid="button-close-nav" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-[hsl(216_43%_18%/.35)] lg:hidden" /> }<main className="min-h-[100dvh] lg:pl-[260px]"><div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div></main></div>;
+  return <div className="app-shell min-h-[100dvh] text-[hsl(var(--foreground))]"><aside className={cn('fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))] px-4 py-5 transition-transform duration-300 lg:translate-x-0', mobileOpen ? 'translate-x-0' : '-translate-x-full')}><div className="flex items-center gap-3 px-3"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-5 w-5" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p><p className="text-[10px] uppercase tracking-[.2em] text-[hsl(var(--sidebar-foreground)/.62)]">AI-Powered Command Center</p></div></div><div className="my-8 h-px bg-[hsl(var(--sidebar-border))]" /><nav className="space-y-1">{items.map(item => { const active = item.href === '/' ? location === '/' : location.startsWith(item.href); const Icon = item.icon; const cls = cn('group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors', active ? 'bg-[hsl(var(--sidebar-accent))] text-white' : 'text-[hsl(var(--sidebar-foreground)/.72)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-white'); const iconCls = cn('h-[18px] w-[18px]', active ? 'text-[hsl(var(--sidebar-primary))]' : 'text-[hsl(var(--sidebar-foreground)/.62)]'); return (item as any).newTab ? <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</a> : <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</Link>; })}</nav><div className="mt-auto pt-4 border-t border-[hsl(var(--sidebar-border))]"><a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/submit`} target="_blank" rel="noopener noreferrer" data-testid="link-nav-public-intake" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[hsl(var(--sidebar-foreground)/.72)] transition-colors hover:bg-[hsl(var(--sidebar-accent))] hover:text-white"><Send className="h-[18px] w-[18px] text-[hsl(var(--sidebar-foreground)/.62)]" />قدم بلاغ</a></div></aside>{mobileOpen && <button aria-label="Close navigation" data-testid="button-close-nav" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-[hsl(216_43%_18%/.35)] lg:hidden" /> }<main className="min-h-[100dvh] lg:pl-[260px]"><div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div></main></div>;
 }
+
+function useReportEdits() {
+  const apiBase = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:3001' : '');
+  return useQuery<Array<{ reportId: number; editedAt: string; field: string; before: string; after: string; originalText: string; incidentClass: string }>>({
+    queryKey: ['report-edits'],
+    queryFn: () => fetch(`${apiBase}/api/reports/edits`).then(r => r.json()),
+    refetchInterval: 5000,
+  });
+}
+
+const fieldLabel: Record<string, string> = {
+  incidentClass: 'Incident class',
+  priority: 'Priority',
+  location: 'Location',
+  peopleAtRisk: 'People at risk',
+  requiredSupport: 'Required support',
+  summary: 'Summary',
+};
 
 function Overview() {
   const dashboard = useGetDashboardSummary();
+  const edits = useReportEdits();
   const data = dashboard.data;
-  return <><PageTitle eyebrow="Situation overview" title="Situation Overview" description="Monitor, classify, and triage incoming Arabic crisis reports." action={<Link href="/analyze" data-testid="link-start-analysis" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="h-4 w-4" /> New analysis</Link>} />{dashboard.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36" />)}</div> : dashboard.isError ? <ErrorPanel onRetry={() => dashboard.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Total reports" value={data.totalReports} note="Total reports in the system" icon={ClipboardList} tone="blue" /><StatCard label="Critical reports" value={data.criticalReports} note="Requires immediate attention" icon={TriangleAlert} tone="red" /><StatCard label="High priority" value={data.highPriority} note="Across all locations" icon={AlertCircle} tone="amber" /><StatCard label="Reports today" value={data.reportsToday} note="Since midnight, current timezone" icon={Clock3} tone="teal" /></div><div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold">Recent reports</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Most recently received reports</p></div><Link href="/reports" data-testid="link-view-all-reports" className="text-xs font-bold text-[hsl(var(--primary))]">View all <ArrowUpRight className="ml-1 inline h-3 w-3" /></Link></div>{data.recentReports?.length ? <div className="space-y-1">{data.recentReports.slice(0, 6).map(report => <ReportRow key={report.id} report={report} />)}</div> : <EmptyPanel title="No reports saved yet" text="No reports have been saved yet. Submit a report for analysis to populate the queue." action={<Link href="/analyze" data-testid="link-empty-analyze" className="mt-4 inline-flex text-sm font-semibold text-[hsl(var(--primary))]">Analyze a report <ArrowUpRight className="ml-1 h-4 w-4" /></Link>} />}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">Priority mix</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Saved reports by review level</p><BarList items={data.byPriority || []} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /><h2 className="mt-8 font-semibold">Incident classes</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Distribution across the demo set</p><BarList items={data.byIncidentClass || []} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></section></div></> : null}</>;
+  return <><PageTitle eyebrow="Situation overview" title="Situation Overview" description="Monitor, classify, and triage incoming Arabic crisis reports." action={<Link href="/analyze" data-testid="link-start-analysis" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="h-4 w-4" /> New analysis</Link>} />{dashboard.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36" />)}</div> : dashboard.isError ? <ErrorPanel onRetry={() => dashboard.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Total reports" value={data.totalReports} note="Total reports in the system" icon={ClipboardList} tone="blue" /><StatCard label="Critical reports" value={data.criticalReports} note="Requires immediate attention" icon={TriangleAlert} tone="red" /><StatCard label="High priority" value={data.highPriority} note="Across all locations" icon={AlertCircle} tone="amber" /><StatCard label="Reports today" value={data.reportsToday} note="Since midnight, current timezone" icon={Clock3} tone="teal" /></div><div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold">Recent reports</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Most recently received reports</p></div><Link href="/reports" data-testid="link-view-all-reports" className="text-xs font-bold text-[hsl(var(--primary))]">View all <ArrowUpRight className="ml-1 inline h-3 w-3" /></Link></div>{data.recentReports?.length ? <div className="space-y-1">{data.recentReports.slice(0, 6).map(report => <ReportRow key={report.id} report={report} />)}</div> : <EmptyPanel title="No reports saved yet" text="No reports have been saved yet. Submit a report for analysis to populate the queue." action={<Link href="/analyze" data-testid="link-empty-analyze" className="mt-4 inline-flex text-sm font-semibold text-[hsl(var(--primary))]">Analyze a report <ArrowUpRight className="ml-1 h-4 w-4" /></Link>} />}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">Priority mix</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Saved reports by review level</p><BarList items={data.byPriority || []} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /><h2 className="mt-8 font-semibold">Incident classes</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Distribution across the demo set</p><BarList items={data.byIncidentClass || []} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></section></div>
+
+{/* Edited reports section */}
+<div className="mt-6">
+  <div className="mb-4 flex items-center gap-2">
+    <Pencil className="h-4 w-4 text-[hsl(var(--primary))]" />
+    <h2 className="font-semibold">Edited reports</h2>
+    <span className="rounded-full bg-[hsl(var(--secondary))] px-2 py-0.5 text-[11px] font-semibold text-[hsl(var(--primary))]">{edits.data?.length ?? 0}</span>
+    <p className="text-xs text-[hsl(var(--muted-foreground))]">— corrections made by analysts for model retraining</p>
+  </div>
+  {edits.isLoading ? <Skeleton className="h-24" /> : !edits.data?.length ? (
+    <div className="rounded-2xl border border-dashed border-[hsl(var(--border))] bg-white p-6 text-center text-sm text-[hsl(var(--muted-foreground))]">No edits yet — open any report and click <strong>Edit</strong> to correct its fields.</div>
+  ) : (
+    <div className="overflow-x-auto rounded-2xl border border-[hsl(var(--border))] bg-white">
+      <table className="w-full min-w-[640px] text-left">
+        <thead><tr className="border-b border-[hsl(var(--border))] text-[11px] uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">
+          <th className="px-4 py-3 font-bold">Report</th>
+          <th className="px-4 py-3 font-bold">Field</th>
+          <th className="px-4 py-3 font-bold">Before</th>
+          <th className="px-4 py-3 font-bold">After</th>
+          <th className="px-4 py-3 font-bold">Edited at</th>
+        </tr></thead>
+        <tbody>{edits.data.map((e, i) => (
+          <tr key={i} className="border-b border-[hsl(var(--border)/.6)] last:border-0 hover:bg-[hsl(var(--muted)/.3)]">
+            <td className="px-4 py-3"><Link href={`/reports/${e.reportId}`} className="block max-w-[220px]"><p className="truncate text-sm font-semibold text-[hsl(var(--foreground))]">{incidentShort(e.incidentClass)}</p><p className="mt-0.5 truncate text-xs text-[hsl(var(--muted-foreground))]" dir="rtl">{e.originalText}</p></Link></td>
+            <td className="px-4 py-3 text-sm font-medium">{fieldLabel[e.field] ?? e.field}</td>
+            <td className="px-4 py-3"><span className="rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 line-through">{e.field === 'peopleAtRisk' ? (e.before === 'true' ? 'At risk' : 'Not identified') : e.before}</span></td>
+            <td className="px-4 py-3"><span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">{e.field === 'peopleAtRisk' ? (e.after === 'true' ? 'At risk' : 'Not identified') : e.after}</span></td>
+            <td className="px-4 py-3 text-xs text-[hsl(var(--muted-foreground))]">{formatDate(e.editedAt)}</td>
+          </tr>
+        ))}</tbody>
+      </table>
+    </div>
+  )}
+</div>
+
+</> : null}</>;
 }
 
 function ReportRow({ report }: { report: Report }) {
@@ -137,16 +195,16 @@ function Analyze() {
   const qc = useQueryClient();
   const submit = () => { if (text.trim()) analyze.mutate({ data: { text: text.trim() } }, { onSuccess: setResult }); };
   const save = () => { if (!result) return; create.mutate({ data: { originalText: text.trim(), ...result } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListReportsQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetLocationsSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetAnalyticsSummaryQueryKey() }); } }); };
-  return <><PageTitle eyebrow="Analysis workspace" title="Analyze Report" description="Submit an Arabic report for automated classification, then review all extracted fields before saving." /><div className="grid gap-6 xl:grid-cols-[.95fr_1.05fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">INPUT</p><h2 className="mt-1 text-lg font-semibold">Original Arabic report</h2></div><Badge className="border-[hsl(var(--border))] bg-[hsl(var(--muted)/.45)] text-[hsl(var(--muted-foreground))]">Arabic · RTL</Badge></div><textarea dir="rtl" value={text} onChange={e => setText(e.target.value)} data-testid="textarea-report" placeholder="مثال: يوجد حريق في منزل بجنزور وهناك طفلان داخل البيت" className="arabic-copy min-h-[300px] w-full resize-y rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-5 text-base text-[hsl(var(--foreground))] outline-none transition focus:border-[hsl(var(--accent))] focus:ring-4 focus:ring-[hsl(var(--accent)/.12)]" /><div className="mt-4 flex items-center justify-between gap-3"><span className="text-xs text-[hsl(var(--muted-foreground))]">{text.length} characters</span><Button onClick={submit} disabled={!text.trim() || analyze.isPending} data-testid="button-analyze-report">{analyze.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Structuring report</> : <><Sparkles className="h-4 w-4" /> Analyze report</>}</Button></div>{analyze.isError && <div className="mt-4"><ErrorPanel message="The analysis service did not respond. Your original text is still here." onRetry={submit} /></div>}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">STRUCTURED OUTPUT</p><h2 className="mt-1 text-lg font-semibold">Structured result</h2></div>{result && <Badge className="border-[hsl(var(--accent)/.35)] bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Check className="mr-1 h-3 w-3" />Analysis complete</Badge>}</div>{result ? <ResultCard result={result} onSave={save} saving={create.isPending} saved={create.isSuccess} /> : <div className="grid min-h-[300px] place-items-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--background))] p-8 text-center"><div><div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Sparkles className="h-5 w-5" /></div><h3 className="font-semibold">Awaiting report submission</h3><p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[hsl(var(--muted-foreground))]">Classification results will populate here after a report is submitted.</p></div></div>}</section></div></>;
+  return <><PageTitle eyebrow="Analysis workspace" title="Analyze Report" description="Submit an Arabic report for automated classification, then review all extracted fields before saving." /><div className="grid gap-6 xl:grid-cols-[.95fr_1.05fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">INPUT</p><h2 className="mt-1 text-lg font-semibold">Original Arabic report</h2></div></div><textarea dir="rtl" value={text} onChange={e => setText(e.target.value)} data-testid="textarea-report" placeholder="مثال: يوجد حريق في منزل بجنزور وهناك طفلان داخل البيت" className="arabic-copy min-h-[300px] w-full resize-y rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-5 text-base text-[hsl(var(--foreground))] outline-none transition focus:border-[hsl(var(--accent))] focus:ring-4 focus:ring-[hsl(var(--accent)/.12)]" /><div className="mt-4 flex items-center justify-between gap-3"><span className="text-xs text-[hsl(var(--muted-foreground))]">{text.length} characters</span><Button onClick={submit} disabled={!text.trim() || analyze.isPending} data-testid="button-analyze-report">{analyze.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Structuring report</> : <><Sparkles className="h-4 w-4" /> Analyze report</>}</Button></div>{analyze.isError && <div className="mt-4"><ErrorPanel message="The analysis service did not respond. Your original text is still here." onRetry={submit} /></div>}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">STRUCTURED OUTPUT</p><h2 className="mt-1 text-lg font-semibold">Structured result</h2></div>{result && <Badge className="border-[hsl(var(--accent)/.35)] bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Check className="mr-1 h-3 w-3" />Analysis complete</Badge>}</div>{result ? <ResultCard result={result} onSave={save} saving={create.isPending} saved={create.isSuccess} /> : <div className="grid min-h-[300px] place-items-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--background))] p-8 text-center"><div><div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Sparkles className="h-5 w-5" /></div><h3 className="font-semibold">Awaiting report submission</h3><p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[hsl(var(--muted-foreground))]">Classification results will populate here after a report is submitted.</p></div></div>}</section></div></>;
 }
 
 function ResultCard({ result, onSave, saving, saved }: { result: AnalysisResult; onSave: () => void; saving: boolean; saved: boolean }) {
   const fields = [['Incident class', result.incidentClass], ['Priority', result.priority], ['Location', result.location || 'Not identified'], ['Required support', result.requiredSupport || 'Not identified']];
-  return <div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label} className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">{label}</p><p className={cn('mt-2 text-sm font-semibold', label === 'Priority' && 'text-[hsl(var(--primary))]')}>{label === 'Priority' ? <Badge className={priorityTone(value)}>{value}</Badge> : value}</p></div>)}</div><div className="grid gap-3 sm:grid-cols-2"><div className="rounded-xl border border-[hsl(var(--border))] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">People at risk</p><p className="mt-2 text-sm font-semibold">{result.peopleAtRisk ? 'Potentially identified' : 'Not identified'}</p></div><div className="rounded-xl border border-[hsl(var(--border))] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Relevance</p><p className="mt-2 text-sm font-semibold">{result.relevance}</p></div></div><div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.35)] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">AI summary</p><p className="mt-2 text-sm leading-6">{result.summary}</p></div><Button onClick={onSave} disabled={saving || saved} className="w-full" data-testid="button-save-analysis">{saved ? <><Check className="h-4 w-4" /> Saved</> : saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : <><ClipboardList className="h-4 w-4" /> Save report</>}</Button></div>;
+  return <div className="space-y-4"><div className="grid gap-3 sm:grid-cols-2">{fields.map(([label, value]) => <div key={label} className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">{label}</p><p className={cn('mt-2 text-sm font-semibold', label === 'Priority' && 'text-[hsl(var(--primary))]')}>{label === 'Priority' ? <Badge className={priorityTone(value)}>{value}</Badge> : value}</p></div>)}</div><div className="rounded-xl border border-[hsl(var(--border))] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">People at risk</p><p className="mt-2 text-sm font-semibold">{result.peopleAtRisk ? 'Potentially identified' : 'Not identified'}</p></div><div className="rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.35)] p-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">AI summary</p><p className="mt-2 text-sm leading-6">{result.summary}</p></div><Button onClick={onSave} disabled={saving || saved} className="w-full" data-testid="button-save-analysis">{saved ? <><Check className="h-4 w-4" /> Saved</> : saving ? <><Loader2 className="h-4 w-4 animate-spin" /> Saving…</> : <><ClipboardList className="h-4 w-4" /> Save report</>}</Button></div>;
 }
 
 const libyanLocations = ['Tripoli', 'Tajoura', 'Janzour', 'Misrata', 'Benghazi', 'Zawiya', 'Gharyan', 'Zliten', 'Sabha'];
-const relevanceOptions = ['Relevant', 'Irrelevant'];
+
 
 function Reports() {
   const [search, setSearch] = useState('');
@@ -160,7 +218,6 @@ function Reports() {
     incidentClass: incident ? incident as typeof incidentClasses[number] : undefined,
     priority: priority ? priority as typeof priorities[number] : undefined,
     location: location || undefined,
-    relevance: relevance ? relevance as 'Relevant' | 'Irrelevant' : undefined,
     sort: sort as 'date' | 'priority' | 'incidentClass',
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -168,7 +225,7 @@ function Reports() {
   const qc = useQueryClient();
   const clear = () => { setSearch(''); setIncident(''); setPriority(''); setLocation(''); setRelevance(''); };
   const remove = (id: number) => { if (window.confirm('Permanently delete this report? This action cannot be undone.')) deleteReport.mutate({ id }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListReportsQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }); } }); };
-  return <><PageTitle eyebrow="Review queue" title="Saved reports" description="Search and filter the full report archive by class, priority, or location." action={<Link href="/analyze" data-testid="link-new-report" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> New analysis</Link>} /><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-6"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><input value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search-reports" placeholder="Search location, class, or summary..." className="h-11 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--background))] pl-10 pr-3 text-sm outline-none focus:border-[hsl(var(--accent))]" /></div><Button variant="outline" onClick={() => setShowFilters(!showFilters)} data-testid="button-toggle-filters"><SlidersHorizontal className="h-4 w-4" /> Filters <ChevronDown className={cn('h-4 w-4 transition-transform', showFilters && 'rotate-180')} /></Button><select value={sort} onChange={e => setSort(e.target.value)} data-testid="select-sort-reports" className="h-11 rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm font-medium outline-none"><option value="date">Newest first</option><option value="priority">Priority</option><option value="incidentClass">Incident class</option></select></div>{showFilters && <div className="mt-4 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-4 sm:flex-row sm:flex-wrap"><select value={incident} onChange={e => setIncident(e.target.value)} data-testid="select-filter-incident" className="h-10 flex-1 min-w-[160px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All incident classes</option>{incidentClasses.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={priority} onChange={e => setPriority(e.target.value)} data-testid="select-filter-priority" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All priorities</option>{priorities.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={location} onChange={e => setLocation(e.target.value)} data-testid="select-filter-location" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All locations</option>{libyanLocations.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={relevance} onChange={e => setRelevance(e.target.value)} data-testid="select-filter-relevance" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All relevance</option>{relevanceOptions.map(value => <option key={value} value={value}>{value}</option>)}</select><Button variant="ghost" onClick={clear} data-testid="button-clear-filters"><X className="h-4 w-4" /> Clear</Button></div>}<div className="mt-5">{reports.isLoading ? <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}</div> : reports.isError ? <ErrorPanel onRetry={() => reports.refetch()} /> : reports.data?.length ? <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-[hsl(var(--border))] text-[11px] uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]"><th className="px-3 py-3 font-bold">Report</th><th className="px-3 py-3 font-bold">Location</th><th className="px-3 py-3 font-bold">Priority</th><th className="px-3 py-3 font-bold">People at Risk</th><th className="px-3 py-3 font-bold">Required Support</th><th className="px-3 py-3 font-bold">Relevance</th><th className="px-3 py-3 font-bold">Created</th><th className="px-3 py-3" /></tr></thead><tbody>{reports.data.map(report => <tr key={report.id} className="group border-b border-[hsl(var(--border)/.7)] last:border-0 hover:bg-[hsl(var(--muted)/.35)]"><td className="px-3 py-4"><Link href={`/reports/${report.id}`} data-testid={`link-table-report-${report.id}`} className="block"><p className="max-w-[250px] truncate text-sm font-semibold text-[hsl(var(--foreground))]">{incidentShort(report.incidentClass)}</p><p className="mt-1 max-w-[280px] truncate text-xs text-[hsl(var(--muted-foreground))]">{report.summary}</p></Link></td><td className="px-3 py-4 text-sm">{report.location || '—'}</td><td className="px-3 py-4"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge></td><td className="px-3 py-4 text-sm text-[hsl(var(--muted-foreground))]">{report.peopleAtRisk ? <Badge className="border-red-200 bg-red-50 text-red-700">At risk</Badge> : <span className="text-[hsl(var(--muted-foreground))]">—</span>}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(report.requiredSupport) || '—'}</td><td className="px-3 py-4"><Badge className={report.relevance === 'Relevant' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-slate-50 text-slate-500'}>{report.relevance}</Badge></td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{formatDate(report.createdAt)}</td><td className="px-3 py-4 text-right"><button onClick={() => remove(report.id)} disabled={deleteReport.isPending} data-testid={`button-delete-report-${report.id}`} aria-label={`Delete report ${report.id}`} className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] opacity-0 transition hover:bg-red-50 hover:text-red-700 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button></td></tr>)}</tbody></table></div> : <EmptyPanel icon={Search} title="No reports match your filters" text="Try a broader search or clear the filters to see the full review queue." action={<Button variant="ghost" onClick={clear} className="mt-4" data-testid="button-empty-clear">Clear filters</Button>} />}</div></section></>;
+  return <><PageTitle eyebrow="Review queue" title="Saved reports" description="Search and filter the full report archive by class, priority, or location." action={<Link href="/analyze" data-testid="link-new-report" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> New analysis</Link>} /><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-6"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><input value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search-reports" placeholder="Search location, class, or summary..." className="h-11 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--background))] pl-10 pr-3 text-sm outline-none focus:border-[hsl(var(--accent))]" /></div><Button variant="outline" onClick={() => setShowFilters(!showFilters)} data-testid="button-toggle-filters"><SlidersHorizontal className="h-4 w-4" /> Filters <ChevronDown className={cn('h-4 w-4 transition-transform', showFilters && 'rotate-180')} /></Button><select value={sort} onChange={e => setSort(e.target.value)} data-testid="select-sort-reports" className="h-11 rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm font-medium outline-none"><option value="date">Newest first</option><option value="priority">Priority</option><option value="incidentClass">Incident class</option></select></div>{showFilters && <div className="mt-4 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-4 sm:flex-row sm:flex-wrap"><select value={incident} onChange={e => setIncident(e.target.value)} data-testid="select-filter-incident" className="h-10 flex-1 min-w-[160px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All incident classes</option>{incidentClasses.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={priority} onChange={e => setPriority(e.target.value)} data-testid="select-filter-priority" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All priorities</option>{priorities.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={location} onChange={e => setLocation(e.target.value)} data-testid="select-filter-location" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All locations</option>{libyanLocations.map(value => <option key={value} value={value}>{value}</option>)}</select><Button variant="ghost" onClick={clear} data-testid="button-clear-filters"><X className="h-4 w-4" /> Clear</Button></div>}<div className="mt-5">{reports.isLoading ? <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}</div> : reports.isError ? <ErrorPanel onRetry={() => reports.refetch()} /> : reports.data?.length ? <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-[hsl(var(--border))] text-[11px] uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]"><th className="px-3 py-3 font-bold">Report</th><th className="px-3 py-3 font-bold">Location</th><th className="px-3 py-3 font-bold">Priority</th><th className="px-3 py-3 font-bold">People at Risk</th><th className="px-3 py-3 font-bold">Required Support</th><th className="px-3 py-3 font-bold">Created</th><th className="px-3 py-3" /></tr></thead><tbody>{reports.data.map(report => <tr key={report.id} className="group border-b border-[hsl(var(--border)/.7)] last:border-0 hover:bg-[hsl(var(--muted)/.35)]"><td className="px-3 py-4"><Link href={`/reports/${report.id}`} data-testid={`link-table-report-${report.id}`} className="block"><p className="max-w-[250px] truncate text-sm font-semibold text-[hsl(var(--foreground))]">{incidentShort(report.incidentClass)}</p><p className="mt-1 max-w-[280px] truncate text-xs text-[hsl(var(--muted-foreground))]">{report.summary}</p></Link></td><td className="px-3 py-4 text-sm">{report.location || '—'}</td><td className="px-3 py-4"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge></td><td className="px-3 py-4 text-sm text-[hsl(var(--muted-foreground))]">{report.peopleAtRisk ? <Badge className="border-red-200 bg-red-50 text-red-700">At risk</Badge> : <span className="text-[hsl(var(--muted-foreground))]">—</span>}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(report.requiredSupport) || '—'}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{formatDate(report.createdAt)}</td><td className="px-3 py-4 text-right"><button onClick={() => remove(report.id)} disabled={deleteReport.isPending} data-testid={`button-delete-report-${report.id}`} aria-label={`Delete report ${report.id}`} className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] opacity-0 transition hover:bg-red-50 hover:text-red-700 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button></td></tr>)}</tbody></table></div> : <EmptyPanel icon={Search} title="No reports match your filters" text="Try a broader search or clear the filters to see the full review queue." action={<Button variant="ghost" onClick={clear} className="mt-4" data-testid="button-empty-clear">Clear filters</Button>} />}</div></section></>;
 }
 
 function ReportDetail() {
@@ -183,22 +240,323 @@ function ReportDetail() {
 }
 
 function DetailContent({ report }: { report: Report }) {
-  return <div className="grid gap-6 xl:grid-cols-[1.1fr_.9fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Original report</h2><Badge className="border-[hsl(var(--border))] bg-[hsl(var(--muted)/.5)] text-[hsl(var(--muted-foreground))]">Arabic · RTL</Badge></div><div dir="rtl" className="arabic-copy rounded-xl bg-[hsl(var(--background))] p-5 text-[15px] leading-8">{report.originalText}</div></section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><h2 className="font-semibold">Structured analysis</h2><Badge className={priorityTone(report.priority)}>{report.priority}</Badge></div><div className="space-y-4"><KeyValue label="Incident class" value={report.incidentClass} /><KeyValue label="Location" value={report.location || 'Not identified'} /><KeyValue label="Required support" value={report.requiredSupport || 'Not identified'} /><KeyValue label="People at risk" value={report.peopleAtRisk ? 'Potentially identified' : 'Not identified'} /><KeyValue label="Relevance" value={report.relevance} /><div className="border-t border-[hsl(var(--border))] pt-4"><p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Summary</p><p className="mt-2 text-sm leading-6">{report.summary}</p></div></div></section></div>;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState({ ...report });
+  const update = useUpdateReport();
+  const qc = useQueryClient();
+
+  const save = () => {
+    update.mutate(
+      { id: report.id, data: { incidentClass: draft.incidentClass, priority: draft.priority, location: draft.location, peopleAtRisk: draft.peopleAtRisk, requiredSupport: draft.requiredSupport, summary: draft.summary } },
+      {
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: getGetReportQueryKey(report.id) });
+          qc.invalidateQueries({ queryKey: getListReportsQueryKey() });
+          qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
+          setEditing(false);
+        },
+      },
+    );
+  };
+
+  const cancel = () => { setDraft({ ...report }); setEditing(false); };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[1.1fr_.9fr]">
+      <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="font-semibold">Original report</h2>
+          
+        </div>
+        <div dir="rtl" className="arabic-copy rounded-xl bg-[hsl(var(--background))] p-5 text-[15px] leading-8">{report.originalText}</div>
+
+      </section>
+
+      <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7">
+        <div className="mb-5 flex items-center justify-between">
+          <h2 className="font-semibold">Structured analysis</h2>
+          <div className="flex items-center gap-2">
+            {!editing && <Badge className={priorityTone(report.priority)}>{report.priority}</Badge>}
+            {editing
+              ? <><Button variant="ghost" onClick={cancel} className="h-8 px-3 text-xs">Cancel</Button><Button onClick={save} disabled={update.isPending} className="h-8 px-3 text-xs">{update.isPending ? <><Loader2 className="h-3 w-3 animate-spin" /> Saving</> : <><Check className="h-3 w-3" /> Save changes</>}</Button></>
+              : <Button variant="outline" onClick={() => setEditing(true)} className="h-8 px-3 text-xs"><Pencil className="h-3 w-3" /> Edit</Button>
+            }
+          </div>
+        </div>
+
+        {editing ? (
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Incident class</label>
+              <select value={draft.incidentClass} onChange={e => setDraft(d => ({ ...d, incidentClass: e.target.value as Report['incidentClass'] }))} className="h-10 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]">
+                {Object.values(IncidentClass).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Priority</label>
+              <select value={draft.priority} onChange={e => setDraft(d => ({ ...d, priority: e.target.value as Report['priority'] }))} className="h-10 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]">
+                {Object.values(Priority).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Location</label>
+              <input value={draft.location} onChange={e => setDraft(d => ({ ...d, location: e.target.value }))} className="h-10 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">People at risk</label>
+              <select value={draft.peopleAtRisk ? 'yes' : 'no'} onChange={e => setDraft(d => ({ ...d, peopleAtRisk: e.target.value === 'yes' }))} className="h-10 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]">
+                <option value="yes">Potentially identified</option>
+                <option value="no">Not identified</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Required support</label>
+              <input value={draft.requiredSupport} onChange={e => setDraft(d => ({ ...d, requiredSupport: e.target.value }))} className="h-10 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Summary</label>
+              <textarea value={draft.summary} onChange={e => setDraft(d => ({ ...d, summary: e.target.value }))} rows={3} className="arabic-copy w-full rounded-lg border border-[hsl(var(--input))] bg-white p-3 text-sm outline-none focus:border-[hsl(var(--accent))]" dir="rtl" />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <KeyValue label="Incident class" value={report.incidentClass} />
+            <KeyValue label="Location" value={report.location || 'Not identified'} />
+            <KeyValue label="Required support" value={report.requiredSupport || 'Not identified'} />
+            <KeyValue label="People at risk" value={report.peopleAtRisk ? 'Potentially identified' : 'Not identified'} />
+            <div className="border-t border-[hsl(var(--border))] pt-4">
+              <p className="text-[11px] font-bold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Summary</p>
+              <p className="mt-2 text-sm leading-6">{report.summary}</p>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  );
 }
 
 function KeyValue({ label, value }: { label: string; value: string }) { return <div className="flex items-start justify-between gap-4 border-b border-[hsl(var(--border)/.7)] pb-3"><span className="text-xs text-[hsl(var(--muted-foreground))]">{label}</span><span className="text-right text-sm font-semibold">{value}</span></div>; }
 
+// Coordinates for common Libyan cities
+const LIBYA_CITY_COORDS: Record<string, [number, number]> = {
+  'طرابلس': [32.9003, 13.1803],
+  'Tripoli': [32.9003, 13.1803],
+  'بنغازي': [32.1194, 20.0868],
+  'Benghazi': [32.1194, 20.0868],
+  'مصراتة': [32.3754, 15.0925],
+  'Misrata': [32.3754, 15.0925],
+  'الزاوية': [32.7573, 12.7277],
+  'Zawiya': [32.7573, 12.7277],
+  'البيضاء': [32.7637, 21.7554],
+  'Al Bayda': [32.7637, 21.7554],
+  'سبها': [27.0377, 14.4283],
+  'Sabha': [27.0377, 14.4283],
+  'الزنتان': [31.9266, 12.1177],
+  'Zintan': [31.9266, 12.1177],
+  'غريان': [32.1728, 13.0203],
+  'Gharyan': [32.1728, 13.0203],
+  'درنة': [32.7635, 22.6376],
+  'Derna': [32.7635, 22.6376],
+  'أجدابيا': [30.7554, 20.2263],
+  'Ajdabiya': [30.7554, 20.2263],
+  'الخمس': [32.6500, 14.2619],
+  'Khoms': [32.6500, 14.2619],
+  'ترهونة': [32.4350, 13.6344],
+  'Tarhuna': [32.4350, 13.6344],
+  'يفرن': [32.0630, 12.5269],
+  'Yefren': [32.0630, 12.5269],
+  'زليتن': [32.4674, 14.5688],
+  'Zliten': [32.4674, 14.5688],
+  'بني وليد': [31.7523, 13.9875],
+  'Bani Walid': [31.7523, 13.9875],
+  'جنزور': [32.9014, 13.0297],
+  'Janzur': [32.9014, 13.0297],
+  'صبراتة': [32.7932, 12.4877],
+  'Sabratha': [32.7932, 12.4877],
+  'الكفرة': [24.1826, 23.3087],
+  'Kufra': [24.1826, 23.3087],
+  'مرزق': [25.9155, 13.8980],
+  'Murzuq': [25.9155, 13.8980],
+  'غدامس': [30.1307, 9.4977],
+  'Ghadames': [30.1307, 9.4977],
+  'توبرق': [31.9431, 24.0680],
+  'Tobruk': [31.9431, 24.0680],
+  'سرت': [31.2089, 16.5887],
+  'Sirte': [31.2089, 16.5887],
+};
+
+function resolveCoords(name: string): [number, number] | null {
+  // exact match
+  if (LIBYA_CITY_COORDS[name]) return LIBYA_CITY_COORDS[name];
+  // partial match
+  const key = Object.keys(LIBYA_CITY_COORDS).find(k =>
+    name.includes(k) || k.includes(name)
+  );
+  return key ? LIBYA_CITY_COORDS[key] : null;
+}
+
 function Locations() {
   const locations = useGetLocationsSummary();
   const rows = locations.data?.locations || [];
-  return <><PageTitle eyebrow="Geographic lens" title="Reporting locations" description="A location-level view of where reports are being received in the demo dataset." />{locations.isLoading ? <LoadingPanel label="Loading location summary" /> : locations.isError ? <ErrorPanel onRetry={() => locations.refetch()} /> : rows.length ? <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-6"><div className="mb-5 flex items-center gap-2"><MapPin className="h-5 w-5 text-[hsl(var(--primary))]" /><div><h2 className="font-semibold">Location summary</h2><p className="text-xs text-[hsl(var(--muted-foreground))]">{rows.length} reporting areas in the current dataset</p></div></div><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{rows.map((row, index) => <div key={row.location} data-testid={`card-location-${index}`} className="rounded-2xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] p-5 transition hover:-translate-y-0.5 hover:border-[hsl(var(--accent)/.55)]"><div className="flex items-start justify-between"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Landmark className="h-4 w-4" /></div><div><h3 className="font-semibold">{row.location}</h3><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Reporting location</p></div></div>{row.criticalReports > 0 && <Badge className="border-red-200 bg-red-50 text-red-700">{row.criticalReports} critical</Badge>}</div><div className="mt-6 grid grid-cols-3 gap-3 border-t border-[hsl(var(--border))] pt-4"><div><p className="font-mono text-xl font-medium">{row.reports}</p><p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Reports</p></div><div><p className="font-mono text-xl font-medium text-red-700">{row.criticalReports}</p><p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">Critical</p></div><div><p className="font-mono text-xl font-medium text-[hsl(var(--primary))]">{row.peopleAtRisk}</p><p className="mt-1 text-[11px] text-[hsl(var(--muted-foreground))]">At risk</p></div></div></div>)}</div></section> : <EmptyPanel icon={MapPin} title="No locations to show" text="Location summaries will appear after reports are saved." />}</>;
+  const [selected, setSelected] = useState<string | null>(null);
+
+  const mapped = rows.map(r => ({ ...r, coords: resolveCoords(r.location) }));
+  const onMap = mapped.filter(r => r.coords !== null);
+  const offMap = mapped.filter(r => r.coords === null);
+  const maxReports = Math.max(...rows.map(r => r.reports), 1);
+
+  const selectedRow = rows.find(r => r.location === selected);
+
+  return (
+    <>
+      <PageTitle
+        eyebrow="Geographic lens"
+        title="Reporting locations"
+        description="A location-level view of where reports are being received in the demo dataset."
+      />
+      {locations.isLoading ? (
+        <LoadingPanel label="Loading location summary" />
+      ) : locations.isError ? (
+        <ErrorPanel onRetry={() => locations.refetch()} />
+      ) : rows.length ? (
+        <div className="grid gap-4 xl:grid-cols-[1fr_320px]">
+          {/* MAP */}
+          <section className="relative overflow-hidden rounded-2xl border border-[hsl(var(--border))] bg-white">
+            <div className="flex items-center gap-2 border-b border-[hsl(var(--border))] px-5 py-3">
+              <MapPin className="h-4 w-4 text-[hsl(var(--primary))]" />
+              <span className="font-semibold text-sm">Libya – reporting map</span>
+              <span className="ml-auto text-xs text-[hsl(var(--muted-foreground))]">{onMap.length} of {rows.length} locations plotted</span>
+            </div>
+            <div style={{ height: '520px' }}>
+              <MapContainer
+                center={[27.0, 17.0]}
+                zoom={5}
+                style={{ height: '100%', width: '100%' }}
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {onMap.map(row => {
+                  const isSel = selected === row.location;
+                  const radius = 6 + Math.round((row.reports / maxReports) * 18);
+                  const color = row.criticalReports > 0 ? '#ef4444' : '#6366f1';
+                  return (
+                    <CircleMarker
+                      key={row.location}
+                      center={row.coords as [number, number]}
+                      radius={radius}
+                      pathOptions={{
+                        color: isSel ? '#1e1b4b' : color,
+                        fillColor: color,
+                        fillOpacity: isSel ? 0.95 : 0.7,
+                        weight: isSel ? 3 : 1.5,
+                      }}
+                      eventHandlers={{ click: () => setSelected(isSel ? null : row.location) }}
+                    >
+                      <LeafletTooltip direction="top" offset={[0, -8]} opacity={0.95}>
+                        <div className="text-xs font-semibold">{row.location}</div>
+                        <div className="text-xs">{row.reports} reports · {row.criticalReports} critical</div>
+                      </LeafletTooltip>
+                    </CircleMarker>
+                  );
+                })}
+              </MapContainer>
+            </div>
+            {/* legend */}
+            <div className="flex items-center gap-4 border-t border-[hsl(var(--border))] px-5 py-2.5 text-xs text-[hsl(var(--muted-foreground))]">
+              <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full bg-indigo-500 opacity-70" />Normal</span>
+              <span className="flex items-center gap-1.5"><span className="inline-block h-3 w-3 rounded-full bg-red-500 opacity-70" />Has critical reports</span>
+              <span className="flex items-center gap-1.5 ml-auto">Circle size ∝ report count</span>
+            </div>
+          </section>
+
+          {/* SIDEBAR */}
+          <aside className="flex flex-col gap-3">
+            {/* selected detail card */}
+            {selectedRow && (
+              <div className="rounded-2xl border border-[hsl(var(--accent)/.5)] bg-[hsl(var(--secondary)/.4)] p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">{selectedRow.location}</h3>
+                  <button onClick={() => setSelected(null)} className="text-[hsl(var(--muted-foreground))] hover:text-foreground">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-xl bg-white p-3 text-center border border-[hsl(var(--border))]">
+                    <p className="font-mono text-xl font-medium">{selectedRow.reports}</p>
+                    <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-1">Reports</p>
+                  </div>
+                  <div className="rounded-xl bg-white p-3 text-center border border-[hsl(var(--border))]">
+                    <p className="font-mono text-xl font-medium text-red-600">{selectedRow.criticalReports}</p>
+                    <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-1">Critical</p>
+                  </div>
+                  <div className="rounded-xl bg-white p-3 text-center border border-[hsl(var(--border))]">
+                    <p className="font-mono text-xl font-medium text-[hsl(var(--primary))]">{selectedRow.peopleAtRisk}</p>
+                    <p className="text-[11px] text-[hsl(var(--muted-foreground))] mt-1">At risk</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* all locations list */}
+            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white overflow-hidden">
+              <div className="flex items-center gap-2 border-b border-[hsl(var(--border))] px-4 py-3">
+                <Landmark className="h-4 w-4 text-[hsl(var(--primary))]" />
+                <span className="text-sm font-semibold">All locations</span>
+                <Badge className="ml-auto border-[hsl(var(--border))] bg-[hsl(var(--muted)/.45)] text-[hsl(var(--muted-foreground))]">{rows.length}</Badge>
+              </div>
+              <div className="divide-y divide-[hsl(var(--border))] max-h-[400px] overflow-y-auto">
+                {rows.map((row, i) => (
+                  <button
+                    key={row.location}
+                    data-testid={`card-location-${i}`}
+                    onClick={() => setSelected(selected === row.location ? null : row.location)}
+                    className={cn(
+                      'w-full flex items-center gap-3 px-4 py-3 text-left transition hover:bg-[hsl(var(--muted)/.4)]',
+                      selected === row.location && 'bg-[hsl(var(--secondary)/.5)]'
+                    )}
+                  >
+                    <div className={cn(
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[hsl(var(--primary))]',
+                      resolveCoords(row.location) ? 'bg-[hsl(var(--secondary))]' : 'bg-amber-50'
+                    )}>
+                      <MapPin className="h-3.5 w-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{row.location}</p>
+                      <p className="text-[11px] text-[hsl(var(--muted-foreground))]">{row.reports} reports</p>
+                    </div>
+                    {row.criticalReports > 0 && (
+                      <Badge className="border-red-200 bg-red-50 text-red-700 shrink-0">{row.criticalReports}</Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* unplotted notice */}
+            {offMap.length > 0 && (
+              <p className="text-xs text-[hsl(var(--muted-foreground))] px-1">
+                <Info className="inline h-3 w-3 mr-1" />
+                {offMap.length} location{offMap.length > 1 ? 's' : ''} not plotted on map (coordinates unknown).
+              </p>
+            )}
+          </aside>
+        </div>
+      ) : (
+        <EmptyPanel icon={MapPin} title="No locations to show" text="Location summaries will appear after reports are saved." />
+      )}
+    </>
+  );
 }
 
 function Analytics() {
   const analytics = useGetAnalyticsSummary();
   const data = analytics.data;
   const max = data ? Math.max(...data.byLocation.map(i => i.count), 1) : 1;
-  return <><PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." />{analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label="Support types" value={data.bySupport.length} note="Support needs observed" icon={ShieldCheck} tone="amber" /></div><div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Support distribution" subtitle="Requested or inferred support"><BarList items={data.bySupport} colors={['bg-[hsl(var(--accent))]', 'bg-[hsl(var(--primary))]', 'bg-teal-500', 'bg-amber-500']} /></ChartPanel><ChartPanel title="Reports by location" subtitle="Current saved dataset"><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div><Evaluation data={data.evaluation} /></> : null}</>;
+  return <><PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." />{analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label="Total reports" value={data.byIncidentClass.reduce((s, i) => s + i.count, 0)} note="Reports in current dataset" icon={ClipboardList} tone="amber" /></div><div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div><div className="mt-6"><ChartPanel title="Reports by location" subtitle="Current saved dataset"><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel></div><Evaluation data={data.evaluation} /></> : null}</>;
 }
 
 function ChartPanel({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) { return <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{subtitle}</p>{children}</section>; }
@@ -221,11 +579,7 @@ function PublicSubmit() {
   const create = useCreateReport();
   const qc = useQueryClient();
   const busy = analyze.isPending || create.isPending;
-  const quickExamples = [
-    'يوجد حريق في منزل بجنزور وهناك طفلان داخل البيت',
-    'حادث سير على الطريق الساحلي قرب تاجوراء',
-    'تجمع مياه يغلق الطريق في طرابلس',
-  ];
+  const quickExamples: string[] = [];
   const submit = () => {
     const originalText = text.trim();
     if (!originalText || busy) return;
@@ -246,14 +600,14 @@ function PublicSubmit() {
     });
   };
 
-  return <div className="relative min-h-[100dvh] overflow-hidden bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
+  return <div dir="rtl" className="relative min-h-[100dvh] overflow-hidden bg-[hsl(var(--background))] text-[hsl(var(--foreground))]">
     <div className="pointer-events-none absolute -right-32 -top-40 h-[520px] w-[520px] rounded-full bg-[hsl(var(--secondary)/.7)] blur-3xl" />
     <div className="pointer-events-none absolute -bottom-52 -left-32 h-[520px] w-[520px] rounded-full bg-[hsl(var(--accent)/.08)] blur-3xl" />
 
-    <main dir="rtl" className="relative mx-auto max-w-[1180px] px-5 py-10 sm:px-8 sm:py-16">
+    <main className="relative mx-auto max-w-[1180px] px-5 py-6 sm:px-8 sm:py-6">
       <div className="grid items-stretch gap-6 lg:grid-cols-[.82fr_1.18fr]">
         <section className="order-2 overflow-hidden rounded-[2rem] bg-[hsl(var(--sidebar))] p-7 text-white shadow-[0_24px_70px_hsl(216_43%_18%_/_0.22)] sm:p-9 lg:order-1">
-          <div className="flex items-center justify-between gap-3" dir="ltr"><span className="font-mono text-[10px] uppercase tracking-[.18em] text-[hsl(var(--sidebar-foreground)/.62)]">Balaagh AI / Signal desk</span><span className="flex items-center gap-2 text-[11px] text-[hsl(var(--sidebar-foreground)/.72)]"><span className="status-dot h-2 w-2 rounded-full bg-[hsl(var(--sidebar-primary))]" /> Online</span></div>
+          <div className="flex items-center gap-3"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-5 w-5" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p></div></div>
           <h2 className="mt-16 max-w-sm text-3xl font-semibold leading-[1.2] tracking-[-.03em] sm:text-4xl">بلاغك يوصل بصورة أوضح.</h2>
           <p className="mt-5 max-w-sm text-sm leading-7 text-[hsl(var(--sidebar-foreground)/.68)]">اكتب ما حدث كما وصلتك المعلومة. النظام يحافظ على النص الأصلي ويجهزه للمراجعة داخل فريق Balaagh AI.</p>
           <div className="mt-10 space-y-3">
@@ -261,11 +615,11 @@ function PublicSubmit() {
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] p-4"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary)/.16)] text-[hsl(var(--sidebar-primary))] font-mono text-xs">02</span><div><p className="text-sm font-semibold">مراجعة البلاغ</p><p className="mt-1 text-xs text-[hsl(var(--sidebar-foreground)/.55)]">يظهر للفريق في قائمة المراجعة</p></div></div>
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] p-4"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary)/.16)] text-[hsl(var(--sidebar-primary))] font-mono text-xs">03</span><div><p className="text-sm font-semibold">تنظيم المعلومات</p><p className="mt-1 text-xs text-[hsl(var(--sidebar-foreground)/.55)]">تُرتب الإشارات للمراجعة البشرية</p></div></div>
           </div>
-          <div className="mt-10 grid grid-cols-3 gap-2 border-t border-white/10 pt-5 text-center"><div><p className="font-mono text-lg text-[hsl(var(--sidebar-primary))]">AR</p><p className="mt-1 text-[10px] text-[hsl(var(--sidebar-foreground)/.55)]">أولوية العربية</p></div><div><p className="font-mono text-lg text-[hsl(var(--sidebar-primary))]">LY</p><p className="mt-1 text-[10px] text-[hsl(var(--sidebar-foreground)/.55)]">السياق الليبي</p></div><div><p className="font-mono text-lg text-[hsl(var(--sidebar-primary))]">01</p><p className="mt-1 text-[10px] text-[hsl(var(--sidebar-foreground)/.55)]">خطوة واحدة</p></div></div>
+
         </section>
         <section className="order-1 rounded-[2rem] border border-[hsl(var(--border))] bg-white p-6 shadow-[0_24px_70px_hsl(220_30%_40%_/_0.08)] sm:p-10 lg:order-2">
-          <div className="mb-8"><p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" /> Public intake / 01</p><h1 className="text-4xl font-semibold tracking-[-.045em] sm:text-5xl">قدّم بلاغًا</h1><p className="mt-4 max-w-xl text-base leading-7 text-[hsl(var(--muted-foreground))]">شارك تفاصيل البلاغ كما وصلتك، حتى تصل المعلومة بصورة أوضح إلى فريق المراجعة.</p></div>
-          {submitted ? <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700"><Check className="h-6 w-6" /></div><h2 className="mt-5 text-xl font-semibold">تم استلام البلاغ</h2><p className="mt-2 text-sm leading-7 text-emerald-900/75">شكراً لمساهمتك. تم حفظ البلاغ للمراجعة داخل نظام Balaagh AI.</p><button type="button" onClick={() => setSubmitted(false)} className="mt-6 inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800">إرسال بلاغ آخر</button></div> : <><label htmlFor="public-report" className="mb-3 block text-sm font-semibold">تفاصيل البلاغ</label><textarea id="public-report" dir="rtl" value={text} onChange={e => { setText(e.target.value); setSubmitted(false); }} data-testid="textarea-public-report" placeholder="مثال: يوجد حريق في منزل بجنزور وهناك طفلان داخل البيت" className="arabic-copy min-h-[230px] w-full resize-y rounded-2xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-5 text-base leading-8 outline-none transition focus:border-[hsl(var(--accent))] focus:ring-4 focus:ring-[hsl(var(--accent)/.12)]" /><div className="mt-3 flex items-center justify-between gap-3 text-xs text-[hsl(var(--muted-foreground))]"><span>{text.length} حرف</span><span>الكتابة بالعربية متاحة</span></div><div className="mt-6"><p className="mb-3 text-xs font-semibold text-[hsl(var(--muted-foreground))]">أمثلة سريعة</p><div className="flex flex-wrap gap-2">{quickExamples.map(example => <button key={example} type="button" onClick={() => { setText(example); setSubmitted(false); }} className="rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-3 py-2 text-right text-xs text-[hsl(var(--muted-foreground))] transition hover:border-[hsl(var(--accent)/.65)] hover:bg-[hsl(var(--secondary)/.55)] hover:text-[hsl(var(--primary))]">{example}</button>)}</div></div><Button onClick={submit} disabled={text.trim().length < 5 || busy} className="mt-7 min-h-12 w-full rounded-xl" data-testid="button-submit-public-report">{busy ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري حفظ البلاغ</> : <><Send className="h-4 w-4" /> إرسال البلاغ للمراجعة</>}</Button><p className="mt-4 text-center text-xs leading-6 text-[hsl(var(--muted-foreground))]">لا تكتب كلمات المرور أو البيانات الشخصية الحساسة.</p>{(analyze.isError || create.isError) && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">تعذر إرسال البلاغ حالياً. حاول مرة أخرى بعد قليل.</div>}</>}
+          <div className="mb-8"><h1 className="text-4xl font-semibold tracking-[-.045em] sm:text-5xl">قدم بلاغ</h1><p className="mt-4 max-w-xl text-base leading-7 text-[hsl(var(--muted-foreground))]">شارك تفاصيل البلاغ كما وصلتك، حتى تصل المعلومة بصورة أوضح إلى فريق المراجعة.</p></div>
+          {submitted ? <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700"><Check className="h-6 w-6" /></div><h2 className="mt-5 text-xl font-semibold">تم استلام البلاغ</h2><p className="mt-2 text-sm leading-7 text-emerald-900/75">شكراً لمساهمتك. تم حفظ البلاغ للمراجعة داخل نظام Balaagh AI.</p><button type="button" onClick={() => setSubmitted(false)} className="mt-6 inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800">إرسال بلاغ آخر</button></div> : <><label htmlFor="public-report" className="mb-3 block text-sm font-semibold">تفاصيل البلاغ</label><textarea id="public-report" dir="rtl" value={text} onChange={e => { setText(e.target.value); setSubmitted(false); }} data-testid="textarea-public-report" placeholder="اكتب البلاغ بالعربية..." className={cn("arabic-copy min-h-[230px] w-full resize-y rounded-2xl border bg-[hsl(var(--background))] p-5 text-base leading-8 outline-none transition focus:ring-4", /[a-zA-Z]/.test(text) ? "border-red-400 focus:border-red-400 focus:ring-red-100" : "border-[hsl(var(--input))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent)/.12)]")} /><div className="mt-3 flex items-center justify-between gap-3 text-xs text-[hsl(var(--muted-foreground))]"><span>{text.length} حرف</span><span>يُقبل النص العربي فقط</span></div>{text.length > 0 && /[a-zA-Z]/.test(text) && <p className="mt-2 text-sm text-red-600">يُرجى الكتابة بالعربية فقط.</p>}<Button onClick={submit} disabled={text.trim().length < 5 || busy || /[a-zA-Z]/.test(text)} className="mt-7 min-h-12 w-full rounded-xl" data-testid="button-submit-public-report">{busy ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري حفظ البلاغ</> : <><Send className="h-4 w-4" /> إرسال البلاغ للمراجعة</>}</Button><p className="mt-4 text-center text-xs leading-6 text-[hsl(var(--muted-foreground))]">لا تكتب كلمات المرور أو البيانات الشخصية الحساسة.</p>{(analyze.isError || create.isError) && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">تعذر إرسال البلاغ حالياً. حاول مرة أخرى بعد قليل.</div>}</>}
         </section>
       </div>
       <div className="mx-auto mt-6 flex max-w-3xl items-start gap-3 rounded-2xl border border-[hsl(var(--accent)/.24)] bg-white/70 p-4 text-xs leading-6 text-[hsl(var(--muted-foreground))]"><Info className="mt-1 h-4 w-4 shrink-0 text-[hsl(var(--primary))]" /><p>هذه الصفحة مخصصة لتسجيل البلاغات للمراجعة. إرسال البلاغ لا يعني إرسال خدمة طوارئ أو اتخاذ إجراء ميداني تلقائي.</p></div>
