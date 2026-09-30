@@ -10,7 +10,6 @@ export const reportsTable = sqliteTable("reports", {
   location: text("location").notNull(),
   peopleAtRisk: integer("people_at_risk", { mode: "boolean" }).notNull(),
   requiredSupport: text("required_support").notNull(),
-  relevance: text("relevance").notNull(),
   summary: text("summary").notNull(),
   createdAt: text("created_at").notNull().$defaultFn(() => new Date().toISOString()),
   analysisTime: text("analysis_time").notNull().default("2.4s"),

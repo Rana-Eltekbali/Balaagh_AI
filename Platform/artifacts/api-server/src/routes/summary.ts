@@ -69,20 +69,7 @@ router.get("/analytics/summary", async (_req, res): Promise<void> => {
     byLocation: countBy(reports.map((r) => r.location).filter(Boolean)),
     bySupport: countBy(reports.map((r) => r.requiredSupport)),
     peopleAtRisk: reports.filter((r) => r.peopleAtRisk).length,
-    evaluation: {
-      accuracy: 0.86,
-      precision: 0.82,
-      recall: 0.79,
-      macroF1: 0.8,
-      confusionMatrix: [
-        [8, 1, 0, 0, 0, 0],
-        [1, 7, 1, 0, 0, 0],
-        [0, 1, 8, 0, 0, 0],
-        [0, 0, 1, 7, 1, 0],
-        [0, 0, 0, 1, 8, 0],
-        [0, 0, 0, 0, 1, 7],
-      ],
-    },
+    evaluation: null,
   }));
 });
 

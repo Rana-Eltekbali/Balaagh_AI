@@ -59,7 +59,6 @@ export function analyzeReportText(text: string): Analysis {
   }
 
   const location = locationMap.find(([arabic]) => normalized.includes(arabic))?.[1] ?? "Unknown";
-  const relevance: Analysis["relevance"] = incidentClass === "Other" ? "Irrelevant" : "Relevant";
 
   let summary = `بلاغ يتعلق بـ ${incidentClass.toLowerCase()} في ${location}.`;
   if (incidentClass === "Fire / Explosion") {
@@ -82,7 +81,6 @@ export function analyzeReportText(text: string): Analysis {
     location,
     peopleAtRisk,
     requiredSupport,
-    relevance,
     summary,
   };
 }

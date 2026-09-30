@@ -19,6 +19,18 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# Local backend tools, Python environments and test artifacts
+.cache/
+.tools/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+*.egg-info/
+backend/test-results/
+
 # Editor
 .vscode/
 .idea/

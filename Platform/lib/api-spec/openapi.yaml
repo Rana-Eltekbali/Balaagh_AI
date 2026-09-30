@@ -1,173 +1,262 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
-  version: 0.1.0
-  description: Balaagh AI report analysis API
+  version: 1.0.0
+  description: Balaagh AI trained-model analysis and persistent report API
 servers:
-  - url: /api
-    description: Base API path
+- url: /api
+  description: Base API path
 tags:
-  - name: health
-    description: Health operations
-  - name: reports
-    description: Crisis report analysis and management
-  - name: dashboard
-    description: Dashboard summaries
-  - name: analytics
-    description: Analytics and model evaluation
+- name: health
+  description: Health operations
+- name: reports
+  description: Crisis report analysis and management
+- name: dashboard
+  description: Dashboard summaries
+- name: analytics
+  description: Analytics and model evaluation
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
+      tags:
+      - health
       summary: Health check
       description: Returns server health status
       responses:
-        "200":
+        '200':
           description: Healthy
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                $ref: '#/components/schemas/HealthStatus'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /reports:
     get:
       operationId: listReports
-      tags: [reports]
+      tags:
+      - reports
       summary: List analyzed crisis reports
       parameters:
-        - $ref: "#/components/parameters/Search"
-        - $ref: "#/components/parameters/IncidentClass"
-        - $ref: "#/components/parameters/Priority"
-        - $ref: "#/components/parameters/Location"
-        - $ref: "#/components/parameters/Relevance"
-        - $ref: "#/components/parameters/Sort"
+      - $ref: '#/components/parameters/Search'
+      - $ref: '#/components/parameters/IncidentClass'
+      - $ref: '#/components/parameters/Priority'
+      - $ref: '#/components/parameters/Location'
+      - $ref: '#/components/parameters/Sort'
       responses:
-        "200":
+        '200':
           description: Matching reports
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Report"
+                  $ref: '#/components/schemas/Report'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
     post:
       operationId: createReport
-      tags: [reports]
+      tags:
+      - reports
       summary: Save an analyzed report
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReportInput"
+              $ref: '#/components/schemas/ReportInput'
       responses:
-        "201":
+        '201':
           description: Saved report
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Report"
+                $ref: '#/components/schemas/Report'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /reports/analyze:
     post:
       operationId: analyzeReport
-      tags: [reports]
-      summary: Analyze an Arabic crisis report using demo logic
+      tags:
+      - reports
+      summary: Analyze Arabic text with trained category, priority and location models
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AnalysisInput"
+              $ref: '#/components/schemas/AnalysisInput'
       responses:
-        "200":
+        '200':
           description: Structured analysis
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AnalysisResult"
+                $ref: '#/components/schemas/AnalysisResult'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /reports/{id}:
     get:
       operationId: getReport
-      tags: [reports]
+      tags:
+      - reports
       summary: Get one analyzed report
       parameters:
-        - $ref: "#/components/parameters/ReportId"
+      - $ref: '#/components/parameters/ReportId'
       responses:
-        "200":
+        '200':
           description: Report details
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Report"
-        "404":
+                $ref: '#/components/schemas/Report'
+        '404':
           description: Report not found
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
     patch:
       operationId: updateReport
-      tags: [reports]
+      tags:
+      - reports
       summary: Update a saved report's fields
       parameters:
-        - $ref: "#/components/parameters/ReportId"
+      - $ref: '#/components/parameters/ReportId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReportUpdate"
+              $ref: '#/components/schemas/ReportUpdate'
       responses:
-        "200":
+        '200':
           description: Updated report
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Report"
-        "404":
+                $ref: '#/components/schemas/Report'
+        '404':
           description: Report not found
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
     delete:
       operationId: deleteReport
-      tags: [reports]
+      tags:
+      - reports
       summary: Delete a saved report
       parameters:
-        - $ref: "#/components/parameters/ReportId"
+      - $ref: '#/components/parameters/ReportId'
       responses:
-        "204":
+        '204':
           description: Report deleted
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /dashboard/summary:
     get:
       operationId: getDashboardSummary
-      tags: [dashboard]
+      tags:
+      - dashboard
       summary: Get dashboard statistics and recent reports
       responses:
-        "200":
+        '200':
           description: Dashboard summary
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardSummary"
+                $ref: '#/components/schemas/DashboardSummary'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /locations/summary:
     get:
       operationId: getLocationsSummary
-      tags: [analytics]
+      tags:
+      - analytics
       summary: Get location reporting summaries
       responses:
-        "200":
+        '200':
           description: Location summary
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LocationsSummary"
+                $ref: '#/components/schemas/LocationsSummary'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
   /analytics/summary:
     get:
       operationId: getAnalyticsSummary
-      tags: [analytics]
-      summary: Get analytics and demo model evaluation
+      tags:
+      - analytics
+      summary: Get saved-report aggregations and optional genuine evaluation
       responses:
-        "200":
+        '200':
           description: Analytics summary
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AnalyticsSummary"
+                $ref: '#/components/schemas/AnalyticsSummary'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /reports/edits:
+    get:
+      operationId: listReportEdits
+      tags:
+      - reports
+      summary: List analyst field corrections, newest first
+      responses:
+        '200':
+          description: Field correction history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportEdit'
+        default:
+          description: Validation, not-found, or service error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 components:
   parameters:
     ReportId:
@@ -187,171 +276,209 @@ components:
       in: query
       required: false
       schema:
-        $ref: "#/components/schemas/IncidentClass"
+        $ref: '#/components/schemas/IncidentClass'
     Priority:
       name: priority
       in: query
       required: false
       schema:
-        $ref: "#/components/schemas/Priority"
+        $ref: '#/components/schemas/Priority'
     Location:
       name: location
       in: query
       required: false
       schema:
         type: string
-    Relevance:
-      name: relevance
-      in: query
-      required: false
-      schema:
-        $ref: "#/components/schemas/Relevance"
     Sort:
       name: sort
       in: query
       required: false
       schema:
         type: string
-        enum: [date, priority, incidentClass]
+        enum:
+        - date
+        - priority
+        - incidentClass
   schemas:
     HealthStatus:
       type: object
       properties:
         status:
           type: string
+        database:
+          type: string
+        modelsLoaded:
+          type: boolean
+        llmEnabled:
+          type: boolean
       required:
-        - status
+      - status
     IncidentClass:
       type: string
       enum:
-        - Fire / Explosion
-        - Flood / Severe Weather
-        - Infrastructure / Utilities
-        - Road / Transportation
-        - People at Risk / Medical
-        - Other
+      - Fire / Explosion
+      - Flood / Severe Weather
+      - Infrastructure / Utilities
+      - Road / Transportation
+      - People at Risk / Medical
+      - Other
     Priority:
       type: string
-      enum: [Low, Medium, High, Critical]
-    Relevance:
-      type: string
-      enum: [Relevant, Irrelevant]
+      enum:
+      - Low
+      - Medium
+      - High
+      - Critical
     Report:
       type: object
       required:
-        - id
-        - originalText
-        - incidentClass
-        - priority
-        - location
-        - peopleAtRisk
-        - requiredSupport
-        - relevance
-        - summary
-        - createdAt
-        - analysisTime
+      - id
+      - originalText
+      - incidentClass
+      - priority
+      - location
+      - peopleAtRisk
+      - requiredSupport
+      - summary
+      - createdAt
+      - analysisTime
+      - updatedAt
       properties:
         id:
           type: integer
         originalText:
           type: string
         incidentClass:
-          $ref: "#/components/schemas/IncidentClass"
+          $ref: '#/components/schemas/IncidentClass'
         priority:
-          $ref: "#/components/schemas/Priority"
+          $ref: '#/components/schemas/Priority'
         location:
           type: string
+          maxLength: 5000
         peopleAtRisk:
           type: boolean
         requiredSupport:
           type: string
-        relevance:
-          $ref: "#/components/schemas/Relevance"
+          maxLength: 500
         summary:
           type: string
+          maxLength: 5000
         createdAt:
           type: string
         analysisTime:
           type: string
+        updatedAt:
+          type: string
+          description: UTC ISO-8601 last-update timestamp
     ReportInput:
       type: object
       required:
-        - originalText
-        - incidentClass
-        - priority
-        - location
-        - peopleAtRisk
-        - requiredSupport
-        - relevance
-        - summary
+      - originalText
+      - incidentClass
+      - priority
+      - location
+      - peopleAtRisk
+      - requiredSupport
+      - summary
       properties:
         originalText:
           type: string
-          minLength: 1
+          minLength: 5
+          maxLength: 5000
         incidentClass:
-          $ref: "#/components/schemas/IncidentClass"
+          $ref: '#/components/schemas/IncidentClass'
         priority:
-          $ref: "#/components/schemas/Priority"
+          $ref: '#/components/schemas/Priority'
         location:
           type: string
+          maxLength: 5000
         peopleAtRisk:
           type: boolean
         requiredSupport:
           type: string
-        relevance:
-          $ref: "#/components/schemas/Relevance"
+          maxLength: 500
         summary:
           type: string
+          maxLength: 5000
+        analysisToken:
+          type:
+          - string
+          - 'null'
+          maxLength: 200000
+          description: Optional signed model metadata receipt; preserve unchanged
+            between analysis and save.
+      additionalProperties: false
     ReportUpdate:
       type: object
       properties:
         incidentClass:
-          $ref: "#/components/schemas/IncidentClass"
+          $ref: '#/components/schemas/IncidentClass'
         priority:
-          $ref: "#/components/schemas/Priority"
+          $ref: '#/components/schemas/Priority'
         location:
           type: string
+          maxLength: 5000
         peopleAtRisk:
           type: boolean
         requiredSupport:
           type: string
+          maxLength: 500
         summary:
           type: string
+          maxLength: 5000
+      additionalProperties: false
     AnalysisInput:
       type: object
-      required: [text]
+      required:
+      - text
       properties:
         text:
           type: string
-          minLength: 1
+          minLength: 5
+          maxLength: 5000
+      additionalProperties: false
     AnalysisResult:
       type: object
       required:
-        - incidentClass
-        - priority
-        - location
-        - peopleAtRisk
-        - requiredSupport
-        - relevance
-        - summary
+      - incidentClass
+      - priority
+      - location
+      - peopleAtRisk
+      - requiredSupport
+      - summary
       properties:
         incidentClass:
-          $ref: "#/components/schemas/IncidentClass"
+          $ref: '#/components/schemas/IncidentClass'
         priority:
-          $ref: "#/components/schemas/Priority"
+          $ref: '#/components/schemas/Priority'
         location:
           type: string
+          maxLength: 5000
         peopleAtRisk:
           type: boolean
         requiredSupport:
           type: string
-        relevance:
-          $ref: "#/components/schemas/Relevance"
+          maxLength: 500
         summary:
           type: string
+          maxLength: 5000
+        analysisToken:
+          type:
+          - string
+          - 'null'
+          maxLength: 200000
+          description: Optional signed model metadata receipt; preserve unchanged
+            between analysis and save.
     DashboardSummary:
       type: object
-      required: [totalReports, criticalReports, highPriority, reportsToday, recentReports, byIncidentClass, byPriority]
+      required:
+      - totalReports
+      - criticalReports
+      - highPriority
+      - reportsToday
+      - recentReports
+      - byIncidentClass
+      - byPriority
       properties:
         totalReports:
           type: integer
@@ -364,26 +491,31 @@ components:
         recentReports:
           type: array
           items:
-            $ref: "#/components/schemas/Report"
+            $ref: '#/components/schemas/Report'
         byIncidentClass:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
         byPriority:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
     LocationsSummary:
       type: object
-      required: [locations]
+      required:
+      - locations
       properties:
         locations:
           type: array
           items:
-            $ref: "#/components/schemas/LocationSummary"
+            $ref: '#/components/schemas/LocationSummary'
     LocationSummary:
       type: object
-      required: [location, reports, criticalReports, peopleAtRisk]
+      required:
+      - location
+      - reports
+      - criticalReports
+      - peopleAtRisk
       properties:
         location:
           type: string
@@ -395,31 +527,41 @@ components:
           type: integer
     AnalyticsSummary:
       type: object
-      required: [byIncidentClass, byPriority, byLocation, bySupport, peopleAtRisk, evaluation]
+      required:
+      - byIncidentClass
+      - byPriority
+      - byLocation
+      - bySupport
+      - peopleAtRisk
+      - evaluation
       properties:
         byIncidentClass:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
         byPriority:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
         byLocation:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
         bySupport:
           type: array
           items:
-            $ref: "#/components/schemas/CountItem"
+            $ref: '#/components/schemas/CountItem'
         peopleAtRisk:
           type: integer
         evaluation:
-          $ref: "#/components/schemas/ModelEvaluation"
+          anyOf:
+          - $ref: '#/components/schemas/ModelEvaluation'
+          - type: 'null'
     CountItem:
       type: object
-      required: [label, count]
+      required:
+      - label
+      - count
       properties:
         label:
           type: string
@@ -427,7 +569,12 @@ components:
           type: integer
     ModelEvaluation:
       type: object
-      required: [accuracy, precision, recall, macroF1, confusionMatrix]
+      required:
+      - accuracy
+      - precision
+      - recall
+      - macroF1
+      - confusionMatrix
       properties:
         accuracy:
           type: number
@@ -443,4 +590,46 @@ components:
             type: array
             items:
               type: integer
-
+    ReportEdit:
+      type: object
+      required:
+      - reportId
+      - editedAt
+      - field
+      - before
+      - after
+      - originalText
+      - incidentClass
+      properties:
+        reportId:
+          type: integer
+        editedAt:
+          type: string
+        field:
+          type: string
+        before:
+          type: string
+        after:
+          type: string
+        originalText:
+          type: string
+        incidentClass:
+          $ref: '#/components/schemas/IncidentClass'
+    ApiError:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          - requestId
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type: string

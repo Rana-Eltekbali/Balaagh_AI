@@ -33,7 +33,7 @@ router.get("/reports", async (req, res): Promise<void> => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { search, incidentClass, priority, location, relevance, sort } = parsed.data;
+  const { search, incidentClass, priority, location, sort } = parsed.data;
 
   let reports = store.getAll();
 
@@ -49,7 +49,6 @@ router.get("/reports", async (req, res): Promise<void> => {
   if (incidentClass) reports = reports.filter((r) => r.incidentClass === incidentClass);
   if (priority) reports = reports.filter((r) => r.priority === priority);
   if (location) reports = reports.filter((r) => r.location.toLowerCase() === location.toLowerCase());
-  if (relevance) reports = reports.filter((r) => r.relevance === relevance);
 
   if (sort === "incidentClass") reports.sort((a, b) => a.incidentClass.localeCompare(b.incidentClass));
   else if (sort === "priority") {

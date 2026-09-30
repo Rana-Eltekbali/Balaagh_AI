@@ -6,7 +6,7 @@ import summaryRouter from "./summary";
 const router: IRouter = Router();
 
 router.use(healthRouter);
-router.use(reportsRouter);
 router.use(summaryRouter);
+router.use(reportsRouter);
 
 export default router;

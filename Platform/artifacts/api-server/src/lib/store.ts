@@ -14,9 +14,9 @@ export interface ReportRow {
   location: string;
   peopleAtRisk: boolean;
   requiredSupport: string;
-  relevance: string;
   summary: string;
   createdAt: string;
+  updatedAt: string;
   analysisTime: string;
 }
 
@@ -42,9 +42,9 @@ function seed() {
       location: r.location,
       peopleAtRisk: r.peopleAtRisk,
       requiredSupport: r.requiredSupport,
-      relevance: r.relevance,
       summary: r.summary,
       createdAt: d.toISOString(),
+      updatedAt: d.toISOString(),
       analysisTime: (r as any).analysisTime ?? "2.0s",
     });
   });
@@ -70,9 +70,9 @@ function seed() {
       location: r.location ?? "",
       peopleAtRisk: r.peopleAtRisk ?? false,
       requiredSupport: r.requiredSupport ?? "",
-      relevance: r.relevance,
       summary: r.summary,
       createdAt: d.toISOString(),
+      updatedAt: d.toISOString(),
       analysisTime: r.analysisTime ?? "2.0s",
     });
   });
@@ -98,9 +98,9 @@ export function insert(data: Omit<InsertReport, "id" | "createdAt"> & { analysis
     location: data.location ?? "",
     peopleAtRisk: data.peopleAtRisk ?? false,
     requiredSupport: data.requiredSupport ?? "",
-    relevance: data.relevance,
     summary: data.summary,
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     analysisTime: data.analysisTime ?? "2.0s",
   };
   rows.push(row);
@@ -143,7 +143,7 @@ export function update(id: number, data: Partial<Omit<ReportRow, "id" | "created
     }
   }
 
-  rows[idx] = { ...rows[idx], ...data };
+  rows[idx] = { ...rows[idx], ...data, updatedAt: now };
   return rows[idx];
 }
 

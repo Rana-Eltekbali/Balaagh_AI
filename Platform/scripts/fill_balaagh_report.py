@@ -80,7 +80,7 @@ def main():
         ),
         (
             "bullet",
-            "Structured output for incident class, priority, location, people at risk, required support, relevance, and summary.",
+            "Structured output for incident class, priority, location, people at risk, required support, and summary.",
         ),
         (
             "bullet",

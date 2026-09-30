@@ -2,7 +2,7 @@
  * All 236 rows from Alla/data/test.csv pre-mapped to the ReportRow shape.
  * incident_type  → incidentClass  (spaces added around "/")
  * priority       → title-cased
- * peopleAtRisk, requiredSupport, relevance, summary derived from text + class
+ * peopleAtRisk, requiredSupport, summary derived from text + class
  */
 import type { InsertReport } from "@workspace/db";
 
@@ -12,7 +12,7 @@ function deriveFields(
   text: string,
   incidentClass: InsertReport["incidentClass"],
   location: string,
-): Pick<SeedEntry, "peopleAtRisk" | "requiredSupport" | "relevance" | "summary"> {
+): Pick<SeedEntry, "peopleAtRisk" | "requiredSupport" | "summary"> {
   const n = text.toLowerCase();
   const hasAny = (terms: string[]) => terms.some((t) => n.includes(t));
 
@@ -23,7 +23,6 @@ function deriveFields(
   ]);
 
   let requiredSupport = "None";
-  let relevance: InsertReport["relevance"] = "Relevant";
   let summary = "";
 
   const loc = location || "غير محدد في البلاغ";
@@ -53,12 +52,11 @@ function deriveFields(
       break;
     case "Other":
       requiredSupport = "None";
-      relevance = "Irrelevant";
       summary = `بلاغ متنوع يحتاج إلى مراجعة من فريق ${loc}.`;
       break;
   }
 
-  return { peopleAtRisk, requiredSupport, relevance, summary };
+  return { peopleAtRisk, requiredSupport, summary };
 }
 
 function make(
