@@ -14,6 +14,10 @@ export interface AnalyticsSummary {
   byLocation: CountItem[];
   bySupport: CountItem[];
   peopleAtRisk: number;
+  /**
+     * Number of reports matching all supplied filters; the full report count when filters are omitted.
+     * @minimum 0
+     */
   totalFiltered: number;
   evaluation: ModelEvaluation | null;
 }

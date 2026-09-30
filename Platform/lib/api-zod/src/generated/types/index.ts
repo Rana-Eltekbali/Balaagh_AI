@@ -13,6 +13,8 @@ export * from './apiError';
 export * from './apiErrorError';
 export * from './countItem';
 export * from './dashboardSummary';
+export * from './getAnalyticsSummaryParams';
+export * from './getAnalyticsSummaryPeopleAtRisk';
 export * from './healthStatus';
 export * from './incidentClass';
 export * from './incidentClassParameter';

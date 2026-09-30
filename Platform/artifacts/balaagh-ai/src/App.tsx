@@ -9,6 +9,8 @@ import {
   IncidentClass,
   Priority,
   type AnalysisResult,
+  type AnalyticsSummary,
+  type GetAnalyticsSummaryParams,
   type CountItem,
   type Report,
 } from '@workspace/api-client-react';
@@ -41,6 +43,7 @@ import {
   ClipboardList,
   Clock3,
   FileSearch,
+  Download,
   Info,
   Landmark,
   LayoutDashboard,
@@ -61,6 +64,7 @@ import {
 } from 'lucide-react';
 import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } from 'wouter';
 import NotFound from '@/pages/not-found';
+import { downloadAnalytics } from '@/lib/analytics-export';
 
 const queryClient = new QueryClient();
 
@@ -552,16 +556,85 @@ function Locations() {
   );
 }
 
+type AnalyticsFilters = {
+  incidentClass: NonNullable<GetAnalyticsSummaryParams['incidentClass']> | '';
+  priority: NonNullable<GetAnalyticsSummaryParams['priority']> | '';
+  location: string;
+  peopleAtRisk: NonNullable<GetAnalyticsSummaryParams['peopleAtRisk']> | '';
+  dateFrom: string;
+  dateTo: string;
+};
+
+const emptyAnalyticsFilters: AnalyticsFilters = {
+  incidentClass: '', priority: '', location: '', peopleAtRisk: '', dateFrom: '', dateTo: '',
+};
+
 function Analytics() {
-  const analytics = useGetAnalyticsSummary();
+  const [filters, setFilters] = useState<AnalyticsFilters>(emptyAnalyticsFilters);
+  const [appliedFilters, setAppliedFilters] = useState<GetAnalyticsSummaryParams>({});
+  const analytics = useGetAnalyticsSummary(appliedFilters);
+  const locations = useGetLocationsSummary();
   const data = analytics.data;
+  const hasFilters = Object.keys(appliedFilters).length > 0;
+  const invalidDates = Boolean(filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo);
   const max = data ? Math.max(...data.byLocation.map(i => i.count), 1) : 1;
-  return <><PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." />{analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label="Total reports" value={data.byIncidentClass.reduce((s, i) => s + i.count, 0)} note="Reports in current dataset" icon={ClipboardList} tone="amber" /></div><div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div><div className="mt-6"><ChartPanel title="Reports by location" subtitle="Current saved dataset"><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel></div><Evaluation data={data.evaluation} /></> : null}</>;
+  const controlClass = 'h-11 w-full rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm outline-none focus:border-[hsl(var(--accent))]';
+  const labelClass = 'mb-1.5 block text-xs font-semibold text-[hsl(var(--muted-foreground))]';
+  const canExport = Boolean(data && !analytics.isFetching && !analytics.isError);
+
+  const applyFilters = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (invalidDates) return;
+    setAppliedFilters({
+      ...(filters.incidentClass && { incidentClass: filters.incidentClass }),
+      ...(filters.priority && { priority: filters.priority }),
+      ...(filters.location && { location: filters.location }),
+      ...(filters.peopleAtRisk && { peopleAtRisk: filters.peopleAtRisk }),
+      ...(filters.dateFrom && { dateFrom: filters.dateFrom }),
+      ...(filters.dateTo && { dateTo: filters.dateTo }),
+    });
+  };
+  const clearFilters = () => {
+    setFilters(emptyAnalyticsFilters);
+    setAppliedFilters({});
+  };
+
+  return <>
+    <PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." action={
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" disabled={!canExport} onClick={() => data && downloadAnalytics(data, 'csv')} data-testid="button-export-analytics-csv"><Download className="h-4 w-4" /> Export CSV</Button>
+        <Button variant="outline" disabled={!canExport} onClick={() => data && downloadAnalytics(data, 'json')} data-testid="button-export-analytics-json"><Download className="h-4 w-4" /> Export JSON</Button>
+      </div>
+    } />
+    <form onSubmit={applyFilters} className="mb-6 rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6">
+      <div className="mb-4 flex items-center gap-3"><h2 className="flex items-center gap-2 font-semibold"><SlidersHorizontal className="h-4 w-4" /> Filters</h2>{hasFilters && <Badge>Filtered view</Badge>}</div>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <label><span className={labelClass}>Incident class</span><select className={controlClass} value={filters.incidentClass} onChange={event => setFilters({ ...filters, incidentClass: event.target.value as AnalyticsFilters['incidentClass'] })} data-testid="analytics-filter-incident"><option value="">All incident classes</option>{incidentClasses.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label><span className={labelClass}>Priority</span><select className={controlClass} value={filters.priority} onChange={event => setFilters({ ...filters, priority: event.target.value as AnalyticsFilters['priority'] })} data-testid="analytics-filter-priority"><option value="">All priorities</option>{priorities.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label><span className={labelClass}>Location</span><select className={controlClass} value={filters.location} onChange={event => setFilters({ ...filters, location: event.target.value })} data-testid="analytics-filter-location"><option value="">All locations</option>{(locations.data?.locations ?? []).map(item => <option key={item.location} value={item.location}>{item.location}</option>)}</select></label>
+        <label><span className={labelClass}>People at risk</span><select className={controlClass} value={filters.peopleAtRisk} onChange={event => setFilters({ ...filters, peopleAtRisk: event.target.value as AnalyticsFilters['peopleAtRisk'] })} data-testid="analytics-filter-risk"><option value="">All</option><option value="true">Yes</option><option value="false">No</option></select></label>
+        <label><span className={labelClass}>Date from</span><input type="date" className={controlClass} value={filters.dateFrom} max={filters.dateTo || undefined} onChange={event => setFilters({ ...filters, dateFrom: event.target.value })} data-testid="analytics-filter-date-from" /></label>
+        <label><span className={labelClass}>Date to</span><input type="date" className={controlClass} value={filters.dateTo} min={filters.dateFrom || undefined} onChange={event => setFilters({ ...filters, dateTo: event.target.value })} data-testid="analytics-filter-date-to" /></label>
+      </div>
+      <p className="mt-3 text-xs text-[hsl(var(--muted-foreground))]">Dates include the selected days in the reporting timezone. Exports use the applied filters.</p>
+      {invalidDates && <p role="alert" className="mt-2 text-sm text-red-700">Date from must be on or before date to.</p>}
+      {locations.isError && <p role="alert" className="mt-2 text-sm text-red-700">Location options could not be loaded. <button type="button" className="underline" onClick={() => locations.refetch()}>Retry locations</button></p>}
+      <div className="mt-4 flex flex-wrap gap-2"><Button type="submit" disabled={invalidDates} data-testid="button-apply-analytics-filters"><SlidersHorizontal className="h-4 w-4" /> Apply filters</Button><Button type="button" variant="ghost" onClick={clearFilters} data-testid="button-clear-analytics-filters"><X className="h-4 w-4" /> Clear filters</Button></div>
+    </form>
+    {analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <>
+      {data.totalFiltered === 0 && <p role="status" className="mb-4 text-sm text-[hsl(var(--muted-foreground))]">No reports match the applied filters.</p>}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label={hasFilters ? 'Filtered reports' : 'Total reports'} value={data.totalFiltered} note={hasFilters ? 'Reports matching the applied filters' : 'Reports in current dataset'} icon={ClipboardList} tone="amber" /></div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div>
+      <div className="mt-6"><ChartPanel title="Reports by location" subtitle={hasFilters ? 'Reports matching the applied filters' : 'Current saved dataset'}><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel></div>
+      <Evaluation data={data.evaluation} />
+    </> : null}
+  </>;
 }
+
 
 function ChartPanel({ title, subtitle, children }: { title: string; subtitle: string; children: ReactNode }) { return <section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">{title}</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">{subtitle}</p>{children}</section>; }
 
-function Evaluation({ data }: { data: { accuracy: number; precision: number; recall: number; macroF1: number; confusionMatrix: number[][] } | null }) {
+function Evaluation({ data }: { data: AnalyticsSummary['evaluation'] }) {
   if (!data) return <div className="mt-6"><EmptyPanel icon={BarChart3} title="Evaluation metrics not available" text="Genuine model evaluation metrics have not been configured." /></div>;
   const metrics = [['Accuracy', data.accuracy], ['Precision', data.precision], ['Recall', data.recall], ['Macro F1', data.macroF1]];
   return <section className="mt-6 rounded-2xl border border-[hsl(var(--accent)/.3)] bg-[hsl(var(--secondary)/.38)] p-5 sm:p-7"><div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start"><div><div className="flex items-center gap-2"><Sparkles className="h-4 w-4 text-[hsl(var(--primary))]" /><p className="font-mono text-xs font-medium uppercase tracking-[.15em] text-[hsl(var(--primary))]">Model Evaluation</p></div><h2 className="mt-2 text-xl font-semibold">Evaluation metrics</h2><p className="mt-1 max-w-xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">Model evaluation metrics for the current classification configuration. Results reflect the current dataset and should be interpreted alongside qualitative review.</p></div><Badge className="w-fit border-[hsl(var(--accent)/.35)] bg-white text-[hsl(var(--primary))]"><CircleHelp className="mr-1 h-3 w-3" /> Current dataset</Badge></div><div className="mt-6 grid gap-3 sm:grid-cols-4">{metrics.map(([label, value]) => <div key={label} className="rounded-xl border border-[hsl(var(--accent)/.22)] bg-white/70 p-4"><p className="text-xs text-[hsl(var(--muted-foreground))]">{label}</p><p className="mt-2 font-mono text-2xl font-medium text-[hsl(var(--primary))]">{typeof value === 'number' ? `${(value * 100).toFixed(1)}%` : value}</p></div>)}</div><div className="mt-6"><p className="text-xs font-semibold uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]">Confusion matrix</p><div className="mt-3 flex max-w-full overflow-x-auto"><div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${Math.max(data.confusionMatrix?.[0]?.length || 1, 1)}, minmax(36px, 1fr))` }}>{(data.confusionMatrix || []).flatMap((row, ri) => row.map((value, ci) => <div key={`${ri}-${ci}`} className="flex h-9 items-center justify-center rounded bg-[hsl(var(--primary)/.1)] font-mono text-xs" style={{ opacity: Math.max(.35, Math.min(1, value / 10)) }}>{value}</div>))}</div></div></div></section>;

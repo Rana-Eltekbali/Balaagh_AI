@@ -153,6 +153,11 @@ export interface AnalyticsSummary {
   byLocation: CountItem[];
   bySupport: CountItem[];
   peopleAtRisk: number;
+  /**
+     * Number of reports matching all supplied filters; the full report count when filters are omitted.
+     * @minimum 0
+     */
+  totalFiltered: number;
   evaluation: ModelEvaluation | null;
 }
 
@@ -200,4 +205,32 @@ priority?: PriorityParameter;
 location?: LocationParameter;
 sort?: SortParameter;
 };
+
+export type GetAnalyticsSummaryParams = {
+incidentClass?: IncidentClassParameter;
+priority?: PriorityParameter;
+/**
+ * @maxLength 5000
+ */
+location?: string;
+peopleAtRisk?: GetAnalyticsSummaryPeopleAtRisk;
+/**
+ * Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE. Omit for no lower bound.
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+dateFrom?: string;
+/**
+ * Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE; must be on or after dateFrom. Omit for no upper bound.
+ * @pattern ^\d{4}-\d{2}-\d{2}$
+ */
+dateTo?: string;
+};
+
+export type GetAnalyticsSummaryPeopleAtRisk = typeof GetAnalyticsSummaryPeopleAtRisk[keyof typeof GetAnalyticsSummaryPeopleAtRisk];
+
+
+export const GetAnalyticsSummaryPeopleAtRisk = {
+  true: 'true',
+  false: 'false',
+} as const;
 

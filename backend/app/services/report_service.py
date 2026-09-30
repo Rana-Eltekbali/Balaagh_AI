@@ -83,8 +83,10 @@ async def update_report(session: AsyncSession, report_id: int, data: ReportUpdat
     return serialize_report(row)
 
 
-async def counts(session, column, nonempty=False):
-    query = select(column.label("label"), func.count().label("count")).group_by(column)
+async def counts(session, column, nonempty=False, filters=()):
+    query = (
+        select(column.label("label"), func.count().label("count")).where(*filters).group_by(column)
+    )
     if nonempty:
         query = query.where(column != "")
     result = await session.execute(query.order_by(func.count().desc(), column.asc()))
@@ -166,14 +168,47 @@ async def location_summary(session):
     return {"locations": [dict(r._mapping) for r in rows]}
 
 
-async def analytics(session, evaluation):
+async def analytics(
+    session,
+    evaluation,
+    *,
+    timezone,
+    incident_class=None,
+    priority=None,
+    location=None,
+    people_at_risk=None,
+    date_from=None,
+    date_to=None,
+):
+    filters = []
+    for column, value in (
+        (ReportRow.incident_class, incident_class),
+        (ReportRow.priority, priority),
+        (ReportRow.location, location),
+    ):
+        if value is not None:
+            filters.append(column == value)
+    if people_at_risk is not None:
+        filters.append(ReportRow.people_at_risk.is_(people_at_risk == "true"))
+    zone = ZoneInfo(timezone)
+    if date_from:
+        start = datetime.combine(date_from, time.min, tzinfo=zone).astimezone(UTC)
+        filters.append(ReportRow.created_at >= start)
+    if date_to:
+        end = datetime.combine(date_to + timedelta(days=1), time.min, tzinfo=zone).astimezone(UTC)
+        filters.append(ReportRow.created_at < end)
     return dict(
-        by_incident_class=await counts(session, ReportRow.incident_class),
-        by_priority=await counts(session, ReportRow.priority),
-        by_location=await counts(session, ReportRow.location, True),
-        by_support=await counts(session, ReportRow.required_support, True),
+        by_incident_class=await counts(session, ReportRow.incident_class, filters=filters),
+        by_priority=await counts(session, ReportRow.priority, filters=filters),
+        by_location=await counts(session, ReportRow.location, True, filters),
+        by_support=await counts(session, ReportRow.required_support, True, filters),
         people_at_risk=await session.scalar(
-            select(func.count()).select_from(ReportRow).where(ReportRow.people_at_risk.is_(True))
+            select(func.count())
+            .select_from(ReportRow)
+            .where(*filters, ReportRow.people_at_risk.is_(True))
+        ),
+        total_filtered=await session.scalar(
+            select(func.count()).select_from(ReportRow).where(*filters)
         ),
         evaluation=evaluation,
     )

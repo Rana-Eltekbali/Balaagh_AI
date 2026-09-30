@@ -281,6 +281,25 @@ export const GetLocationsSummaryResponse = zod.object({
 /**
  * @summary Get saved-report aggregations and optional genuine evaluation
  */
+export const getAnalyticsSummaryQueryLocationMax = 5000;
+
+export const getAnalyticsSummaryQueryDateFromRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+export const getAnalyticsSummaryQueryDateToRegExp = new RegExp('^\\d{4}-\\d{2}-\\d{2}$');
+
+
+export const GetAnalyticsSummaryQueryParams = zod.object({
+  "incidentClass": zod.enum(['Fire / Explosion', 'Flood / Severe Weather', 'Infrastructure / Utilities', 'Road / Transportation', 'People at Risk / Medical', 'Other']).optional(),
+  "priority": zod.enum(['Low', 'Medium', 'High', 'Critical']).optional(),
+  "location": zod.coerce.string().max(getAnalyticsSummaryQueryLocationMax).optional(),
+  "peopleAtRisk": zod.enum(['true', 'false']).optional(),
+  "dateFrom": zod.coerce.string().regex(getAnalyticsSummaryQueryDateFromRegExp).optional().describe('Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE. Omit for no lower bound.'),
+  "dateTo": zod.coerce.string().regex(getAnalyticsSummaryQueryDateToRegExp).optional().describe('Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE; must be on or after dateFrom. Omit for no upper bound.')
+})
+
+export const getAnalyticsSummaryResponseTotalFilteredMin = 0;
+
+
+
 export const GetAnalyticsSummaryResponse = zod.object({
   "byIncidentClass": zod.array(zod.object({
   "label": zod.string(),
@@ -299,6 +318,7 @@ export const GetAnalyticsSummaryResponse = zod.object({
   "count": zod.number().int()
 })),
   "peopleAtRisk": zod.number().int(),
+  "totalFiltered": zod.number().int().min(getAnalyticsSummaryResponseTotalFilteredMin).describe('Number of reports matching all supplied filters; the full report count when filters are omitted.'),
   "evaluation": zod.union([zod.object({
   "accuracy": zod.number(),
   "precision": zod.number(),
@@ -322,4 +342,5 @@ export const ListReportEditsResponseItem = zod.object({
   "incidentClass": zod.enum(['Fire / Explosion', 'Flood / Severe Weather', 'Infrastructure / Utilities', 'Road / Transportation', 'People at Risk / Medical', 'Other'])
 })
 export const ListReportEditsResponse = zod.array(ListReportEditsResponseItem)
+
 

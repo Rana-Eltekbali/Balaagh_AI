@@ -50,4 +50,5 @@ class AnalyticsSummary(ApiModel):
     by_location: list[CountItem]
     by_support: list[CountItem]
     people_at_risk: int
+    total_filtered: int = Field(ge=0)
     evaluation: ModelEvaluation | None

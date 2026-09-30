@@ -223,6 +223,35 @@ paths:
       tags:
       - analytics
       summary: Get saved-report aggregations and optional genuine evaluation
+      parameters:
+      - $ref: '#/components/parameters/IncidentClass'
+      - $ref: '#/components/parameters/Priority'
+      - name: location
+        in: query
+        required: false
+        schema:
+          type: string
+          maxLength: 5000
+      - name: peopleAtRisk
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: ['true', 'false']
+      - name: dateFrom
+        in: query
+        required: false
+        description: Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE. Omit for no lower bound.
+        schema:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
+      - name: dateTo
+        in: query
+        required: false
+        description: Inclusive YYYY-MM-DD creation date in REPORTS_TIMEZONE; must be on or after dateFrom. Omit for no upper bound.
+        schema:
+          type: string
+          pattern: '^\d{4}-\d{2}-\d{2}$'
       responses:
         '200':
           description: Analytics summary
@@ -533,6 +562,7 @@ components:
       - byLocation
       - bySupport
       - peopleAtRisk
+      - totalFiltered
       - evaluation
       properties:
         byIncidentClass:
@@ -553,6 +583,10 @@ components:
             $ref: '#/components/schemas/CountItem'
         peopleAtRisk:
           type: integer
+        totalFiltered:
+          type: integer
+          minimum: 0
+          description: Number of reports matching all supplied filters; the full report count when filters are omitted.
         evaluation:
           anyOf:
           - $ref: '#/components/schemas/ModelEvaluation'

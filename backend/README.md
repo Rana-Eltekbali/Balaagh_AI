@@ -115,6 +115,10 @@ The value is the backend origin, without `/api`. Run `pnpm --dir Platform --filt
 
 List accepts `search`, `incidentClass`, `priority`, `location`, `sort=date|priority|incidentClass`. Search covers original text, summary, location and class with escaped literal wildcards and bound ORM parameters. Responses have camelCase keys and no `data` envelope. `analysisTime` is formatted seconds, or empty for unknown/manual durations. There is no report-status workflow.
 
+Analytics accepts optional `incidentClass`, `priority`, `location`, `peopleAtRisk=true|false`, `dateFrom`, and `dateTo`. Class, priority and primary location match exactly; supplied filters combine with AND. Dates use `YYYY-MM-DD` and include both selected creation dates in `REPORTS_TIMEZONE`. Invalid values or reversed date ranges return 422. Omit a parameter to leave it unrestricted.
+
+Every analytics distribution and `peopleAtRisk` count uses the same filters. `totalFiltered` is the matching report count, including reports with an empty location/support; without filters it is the full report count. `evaluation` remains the configured model evaluation artifact (or null), independent of report filters. The frontend exports the applied analytics response, not unsaved filter selections. This extension requires no database migration; deploy/restart the backend before deploying the updated frontend.
+
 Errors use `{"error":{"code":"...","message":"...","requestId":"..."}}`. Validation is 422, absent reports 404, capacity/DB failures 503, unexpected failures 500 and oversized bodies 413. Report input is trimmed, 5–5000 characters. Body size is bounded, including chunked requests. The model receipt is validated against the original text and rejected if changed, expired or tampered with.
 
 ## Optional LLM and evaluation

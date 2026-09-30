@@ -25,6 +25,7 @@ import type {
   AnalyticsSummary,
   ApiError,
   DashboardSummary,
+  GetAnalyticsSummaryParams,
   HealthStatus,
   ListReportsParams,
   LocationsSummary,
@@ -793,20 +794,27 @@ export function useGetLocationsSummary<TData = Awaited<ReturnType<typeof getLoca
 
 
 
-export const getGetAnalyticsSummaryUrl = () => {
+export const getGetAnalyticsSummaryUrl = (params?: GetAnalyticsSummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/analytics/summary`
+  return stringifiedParams.length > 0 ? `/api/analytics/summary?${stringifiedParams}` : `/api/analytics/summary`
 }
 
 /**
  * @summary Get saved-report aggregations and optional genuine evaluation
  */
-export const getAnalyticsSummary = async ( options?: Parameters<typeof customFetch>[1]): Promise<AnalyticsSummary> => {
+export const getAnalyticsSummary = async (params?: GetAnalyticsSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<AnalyticsSummary> => {
 
-  return customFetch<AnalyticsSummary>(getGetAnalyticsSummaryUrl(),
+  return customFetch<AnalyticsSummary>(getGetAnalyticsSummaryUrl(params),
   {
     ...options,
     method: 'GET'
@@ -819,23 +827,23 @@ export const getAnalyticsSummary = async ( options?: Parameters<typeof customFet
 
 
 
-export const getGetAnalyticsSummaryQueryKey = () => {
+export const getGetAnalyticsSummaryQueryKey = (params?: GetAnalyticsSummaryParams,) => {
     return [
-    `/api/analytics/summary`
+    `/api/analytics/summary`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetAnalyticsSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getAnalyticsSummary>>, TError = ErrorType<ApiError>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetAnalyticsSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getAnalyticsSummary>>, TError = ErrorType<ApiError>>(params?: GetAnalyticsSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetAnalyticsSummaryQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetAnalyticsSummaryQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsSummary>>> = ({ signal }) => getAnalyticsSummary({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAnalyticsSummary>>> = ({ signal }) => getAnalyticsSummary(params, { signal, ...requestOptions });
 
 
 
@@ -853,11 +861,11 @@ export type GetAnalyticsSummaryQueryError = ErrorType<ApiError>
  */
 
 export function useGetAnalyticsSummary<TData = Awaited<ReturnType<typeof getAnalyticsSummary>>, TError = ErrorType<ApiError>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: GetAnalyticsSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAnalyticsSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetAnalyticsSummaryQueryOptions(options)
+  const queryOptions = getGetAnalyticsSummaryQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
