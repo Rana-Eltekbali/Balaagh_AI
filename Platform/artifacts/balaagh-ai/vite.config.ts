@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: '/Balaagh_AI/',
+  base: process.env.VITE_BASE_PATH ?? '/Balaagh_AI/',
   plugins: [
     react(),
     tailwindcss(),
@@ -30,9 +30,21 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     host: 'localhost',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port: 5173,
     host: 'localhost',
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
 });

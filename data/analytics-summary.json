@@ -1,0 +1,720 @@
+﻿{
+    "byIncidentClass":  [
+                            {
+                                "label":  "Infrastructure / Utilities",
+                                "count":  47
+                            },
+                            {
+                                "label":  "Road / Transportation",
+                                "count":  47
+                            },
+                            {
+                                "label":  "Fire / Explosion",
+                                "count":  45
+                            },
+                            {
+                                "label":  "People at Risk / Medical",
+                                "count":  44
+                            },
+                            {
+                                "label":  "Flood / Severe Weather",
+                                "count":  35
+                            },
+                            {
+                                "label":  "Other",
+                                "count":  28
+                            }
+                        ],
+    "byPriority":  [
+                       {
+                           "label":  "High",
+                           "count":  86
+                       },
+                       {
+                           "label":  "Medium",
+                           "count":  73
+                       },
+                       {
+                           "label":  "Critical",
+                           "count":  45
+                       },
+                       {
+                           "label":  "Low",
+                           "count":  42
+                       }
+                   ],
+    "byLocation":  [
+                       {
+                           "label":  "البيضاء",
+                           "count":  7
+                       },
+                       {
+                           "label":  "درنة",
+                           "count":  6
+                       },
+                       {
+                           "label":  "طريق المطار",
+                           "count":  6
+                       },
+                       {
+                           "label":  "الزاوية",
+                           "count":  5
+                       },
+                       {
+                           "label":  "الخمس",
+                           "count":  5
+                       },
+                       {
+                           "label":  "تاجوراء",
+                           "count":  4
+                       },
+                       {
+                           "label":  "زليتن",
+                           "count":  4
+                       },
+                       {
+                           "label":  "غريان",
+                           "count":  4
+                       },
+                       {
+                           "label":  "مرزق",
+                           "count":  3
+                       },
+                       {
+                           "label":  "السراج",
+                           "count":  3
+                       },
+                       {
+                           "label":  "عين زارة",
+                           "count":  3
+                       },
+                       {
+                           "label":  "بني وليد",
+                           "count":  3
+                       },
+                       {
+                           "label":  "قصر بن غشير",
+                           "count":  3
+                       },
+                       {
+                           "label":  "سبها",
+                           "count":  2
+                       },
+                       {
+                           "label":  "الكفرة",
+                           "count":  2
+                       },
+                       {
+                           "label":  "قنفودة غرب بنغازي",
+                           "count":  2
+                       },
+                       {
+                           "label":  "طريق الشط وطرابلس",
+                           "count":  2
+                       },
+                       {
+                           "label":  "البركة",
+                           "count":  2
+                       },
+                       {
+                           "label":  "رأس لانوف",
+                           "count":  2
+                       },
+                       {
+                           "label":  "سوق الجمعة",
+                           "count":  2
+                       },
+                       {
+                           "label":  "العجيلات",
+                           "count":  2
+                       },
+                       {
+                           "label":  "وادي الربيع",
+                           "count":  2
+                       },
+                       {
+                           "label":  "هون",
+                           "count":  2
+                       },
+                       {
+                           "label":  "الدهماني",
+                           "count":  2
+                       },
+                       {
+                           "label":  "الرجبان",
+                           "count":  2
+                       },
+                       {
+                           "label":  "جنزور غرب طرابلس",
+                           "count":  2
+                       },
+                       {
+                           "label":  "غات",
+                           "count":  2
+                       },
+                       {
+                           "label":  "الجفرة",
+                           "count":  2
+                       },
+                       {
+                           "label":  "الكيش في بنغازي",
+                           "count":  2
+                       },
+                       {
+                           "label":  "Tripoli",
+                           "count":  2
+                       },
+                       {
+                           "label":  "طريق الشط في طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سرت",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الهواري",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سبها المنشية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مطار معيتيقة الدولي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "البريقة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "بوهديمة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "بير العالم",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي شبنة وبنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طبرق",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق المشتل عين زارة طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مقهى غرناطة وتاجوراء",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حمده",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الظهرة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الجزيرة مصراتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "قرقارش",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي الزيتون",
+                           "count":  1
+                       },
+                       {
+                           "label":  "تلبيغة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سوق الخميس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "كوبري المصانع",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الهواري في بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "التربولي مول",
+                           "count":  1
+                       },
+                       {
+                           "label":  "أوباري",
+                           "count":  1
+                       },
+                       {
+                           "label":  "جنزور",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شبنة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي المنشية وسبها",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الهضبة الخضراء",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الجرابة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع طرابلس أجدابيا",
+                           "count":  1
+                       },
+                       {
+                           "label":  "النجيلة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "أبو سليم",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق وازن والغزايا",
+                           "count":  1
+                       },
+                       {
+                           "label":  "قاريونس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع الجرابة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مراد مسعود",
+                           "count":  1
+                       },
+                       {
+                           "label":  "صبراتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سوق الجمعة في طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الشواطئ الليبية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مستشفى طرابلس الجامعي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الحدائق وبنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الزنتان",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الجامعة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "معتيقة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الحميدية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع النجمة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مصراتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "وسط مدينة الزاوية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "وادي مرسيط",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي أرض بن علي والفويهات",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الشط وتاجوراء",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الطريق الساحلي شرقي سرت",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مطار معيتيقة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الساحل الشرقي الليبي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "البركة في بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق سرت-الجفرة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الهضبة طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سجن الجديدة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "بن عاشور",
+                           "count":  1
+                       },
+                       {
+                           "label":  "تاجورا",
+                           "count":  1
+                       },
+                       {
+                           "label":  "يفرن",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق البينيا شارع البرج عين زارة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "مصفاة الزاوية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "كوبري زناتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الدافنية غرب مصراتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "رقدالين",
+                           "count":  1
+                       },
+                       {
+                           "label":  "جامعة بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الهضبة في طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "رأس اجدير",
+                           "count":  1
+                       },
+                       {
+                           "label":  "نالوت",
+                           "count":  1
+                       },
+                       {
+                           "label":  "أجدابيا",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الصياد",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الطريق الساحلي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سلوق جنوب بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "سلوق",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الفويهات",
+                           "count":  1
+                       },
+                       {
+                           "label":  "زريق في مصراتة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "ودان",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الليثي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "بوعطني في بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "صلاح الدين في طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شط الهنشير",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع الزاوية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق المطار في طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "أبوكشفة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "تراغن",
+                           "count":  1
+                       },
+                       {
+                           "label":  "زوارة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق عرادة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع 24 ديسمبر",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي الأندلس بطرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شحات",
+                           "count":  1
+                       },
+                       {
+                           "label":  "محطة وقود بوترابة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الشط سوق الجمعة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "النوفليين",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي الأندلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "القره بوللي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الجميل",
+                           "count":  1
+                       },
+                       {
+                           "label":  "شارع المعدات الطبية",
+                           "count":  1
+                       },
+                       {
+                           "label":  "طريق الخلاطات",
+                           "count":  1
+                       },
+                       {
+                           "label":  "وادي درنة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الليثي في بنغازي",
+                           "count":  1
+                       },
+                       {
+                           "label":  "تاكنس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "راس اجدير",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الهضبة",
+                           "count":  1
+                       },
+                       {
+                           "label":  "صلاح الدين",
+                           "count":  1
+                       },
+                       {
+                           "label":  "الزاوية المركز",
+                           "count":  1
+                       },
+                       {
+                           "label":  "جنوب طرابلس",
+                           "count":  1
+                       },
+                       {
+                           "label":  "حي الأكواخ",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Sabha",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Gharyan",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Zliten",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Zawiya",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Benghazi",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Misrata",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Tajoura",
+                           "count":  1
+                       },
+                       {
+                           "label":  "Janzour",
+                           "count":  1
+                       }
+                   ],
+    "bySupport":  [
+                      {
+                          "label":  "None",
+                          "count":  75
+                      },
+                      {
+                          "label":  "Medical / Rescue",
+                          "count":  43
+                      },
+                      {
+                          "label":  "Firefighting",
+                          "count":  35
+                      },
+                      {
+                          "label":  "Traffic Management",
+                          "count":  33
+                      },
+                      {
+                          "label":  "Rescue",
+                          "count":  26
+                      },
+                      {
+                          "label":  "Medical / Traffic Management",
+                          "count":  24
+                      },
+                      {
+                          "label":  "Firefighting / Rescue",
+                          "count":  10
+                      }
+                  ],
+    "peopleAtRisk":  89,
+    "totalFiltered":  246,
+    "evaluation":  {
+                       "accuracy":  0.86,
+                       "precision":  0.82,
+                       "recall":  0.79,
+                       "macroF1":  0.8,
+                       "confusionMatrix":  [
+                                               [
+                                                   8,
+                                                   1,
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   0
+                                               ],
+                                               [
+                                                   1,
+                                                   7,
+                                                   1,
+                                                   0,
+                                                   0,
+                                                   0
+                                               ],
+                                               [
+                                                   0,
+                                                   1,
+                                                   8,
+                                                   0,
+                                                   0,
+                                                   0
+                                               ],
+                                               [
+                                                   0,
+                                                   0,
+                                                   1,
+                                                   7,
+                                                   1,
+                                                   0
+                                               ],
+                                               [
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   1,
+                                                   8,
+                                                   0
+                                               ],
+                                               [
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   0,
+                                                   1,
+                                                   7
+                                               ]
+                                           ]
+                   }
+}

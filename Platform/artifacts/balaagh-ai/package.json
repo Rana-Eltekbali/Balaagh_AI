@@ -8,8 +8,9 @@
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "predeploy": "pnpm run build",
-    "deploy": "gh-pages -d dist/public"
+    "predeploy": "pnpm run build:static",
+    "deploy": "gh-pages -d dist/public",
+    "build:static": "cross-env VITE_STATIC_MODE=true vite build --config vite.config.ts && cp dist/public/index.html dist/public/404.html"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -54,6 +55,7 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "cmdk": "^1.1.1",
+    "cross-env": "^10.1.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "catalog:",

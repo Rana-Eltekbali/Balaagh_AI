@@ -14,5 +14,6 @@ export interface AnalyticsSummary {
   byLocation: CountItem[];
   bySupport: CountItem[];
   peopleAtRisk: number;
+  totalFiltered: number;
   evaluation: ModelEvaluation | null;
 }
