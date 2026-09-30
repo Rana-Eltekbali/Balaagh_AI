@@ -62,7 +62,7 @@ async def assert_private_report_storage(settings):
 @pytest.mark.skipif(
     not os.environ.get("TEST_DATABASE_URL"), reason="TEST_DATABASE_URL not configured"
 )
-def test_postgres_migration_crud_and_cascade(monkeypatch, report_input):
+def test_postgres_migration_crud_and_cascade(monkeypatch, report_input, demo_token):
     url = os.environ["TEST_DATABASE_URL"]
     assert url.startswith("postgresql+asyncpg://")
     monkeypatch.setenv("APP_ENV", "test")
@@ -71,7 +71,7 @@ def test_postgres_migration_crud_and_cascade(monkeypatch, report_input):
     command.upgrade(Config("alembic.ini"), "head")
     cfg = Settings(_env_file=None, app_env="test", database_url=url, inference_mode="disabled")
     asyncio.run(assert_private_report_storage(cfg))
-    with TestClient(create_app(cfg)) as client:
+    with TestClient(create_app(cfg), headers={"Authorization": f"Bearer {demo_token}"}) as client:
         response = client.post("/api/reports", json=report_input)
         assert response.status_code == 201
         report_id = response.json()["id"]

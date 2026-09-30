@@ -1,3 +1,5 @@
+import os
+import secrets
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -6,9 +8,18 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 
-from app.config import Settings, get_settings
-from app.main import create_app
-from app.schemas.reports import ExtractedLocation
+# Isolate tests from the real local demo key, including app creation during collection.
+os.environ["DEMO_AUTH_ENABLED"] = "true"
+os.environ["DEMO_API_TOKEN"] = secrets.token_urlsafe(48)
+
+from app.config import Settings, get_settings  # noqa: E402
+from app.main import create_app  # noqa: E402
+from app.schemas.reports import ExtractedLocation  # noqa: E402
+
+
+@pytest.fixture
+def demo_token():
+    return os.environ["DEMO_API_TOKEN"]
 
 
 class FixedModel:
@@ -20,7 +31,7 @@ class FixedModel:
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, demo_token):
     database = tmp_path / "reports.sqlite"
     url = f"sqlite+aiosqlite:///{database.as_posix()}"
     monkeypatch.setenv("APP_ENV", "test")
@@ -43,7 +54,9 @@ def client(tmp_path, monkeypatch):
         location=FixedModel([ExtractedLocation(name="طرابلس", start=8, end=14, confidence=0.94)]),
     )
     app = create_app(settings, models=models)
-    with TestClient(app, raise_server_exceptions=False) as test_client:
+    with TestClient(
+        app, raise_server_exceptions=False, headers={"Authorization": f"Bearer {demo_token}"}
+    ) as test_client:
         test_client.database_path = database
         yield test_client
     get_settings.cache_clear()

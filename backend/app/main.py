@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 
 import anyio
 import httpx
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -17,6 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 from app.api import analytics, dashboard, health, locations, reports
 from app.config import Settings, get_settings
 from app.db.session import create_database
+from app.dependencies import require_demo_access
 from app.ml.loader import load_models
 from app.schemas.summaries import ModelEvaluation
 from app.services.analysis_receipt import AnalysisReceipt
@@ -88,7 +89,10 @@ def create_app(settings: Settings | None = None, *, models=None):
 
     @app.exception_handler(HTTPException)
     async def http_error(_request: Request, exc: HTTPException):
-        return error_response(exc.status_code, f"http_{exc.status_code}", str(exc.detail))
+        response = error_response(exc.status_code, f"http_{exc.status_code}", str(exc.detail))
+        if exc.headers:
+            response.headers.update(exc.headers)
+        return response
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(_request: Request, _exc: RequestValidationError):
@@ -106,14 +110,14 @@ def create_app(settings: Settings | None = None, *, models=None):
         logger.error("request_failed_unexpectedly type=%s", type(_exc).__name__)
         return error_response(500, "internal_error", "Unable to complete this request")
 
+    app.include_router(health.router, prefix="/api")
     for router in (
-        health.router,
         reports.router,
         dashboard.router,
         locations.router,
         analytics.router,
     ):
-        app.include_router(router, prefix="/api")
+        app.include_router(router, prefix="/api", dependencies=[Depends(require_demo_access)])
     return app
 
 

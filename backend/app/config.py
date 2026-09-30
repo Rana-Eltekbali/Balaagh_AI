@@ -6,7 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
+    model_config = SettingsConfigDict(
+        env_file=".env", extra="ignore", case_sensitive=False, hide_input_in_errors=True
+    )
 
     app_env: Literal["development", "test", "production"] = "development"
     host: str = "0.0.0.0"
@@ -30,6 +32,8 @@ class Settings(BaseSettings):
     llm_base_url: str = ""
     llm_timeout_seconds: float = Field(default=15, gt=0, le=120)
     cors_origins: str = "http://localhost:5173"
+    demo_auth_enabled: bool = True
+    demo_api_token: SecretStr = SecretStr("")
     model_evaluation_json: str = ""
     reports_timezone: str = "Africa/Tripoli"
     analysis_signing_key: SecretStr = SecretStr("")
@@ -38,6 +42,18 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_configuration(self):
+        if self.demo_auth_enabled:
+            token = self.demo_api_token.get_secret_value()
+            if (
+                not 32 <= len(token) <= 512
+                or not token.isascii()
+                or any(c.isspace() for c in token)
+            ):
+                raise ValueError(
+                    "DEMO_API_TOKEN must contain 32-512 ASCII characters without whitespace"
+                )
+        elif self.app_env == "production":
+            raise ValueError("Production requires DEMO_AUTH_ENABLED=true")
         if self.app_env == "production":
             if self.inference_mode != "real":
                 raise ValueError("Production requires INFERENCE_MODE=real")

@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/reac
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { DemoAccessDialog } from '@/components/demo-access-dialog';
 import {
   IncidentClass,
+  ApiError,
   Priority,
   type AnalysisResult,
   type AnalyticsSummary,
@@ -66,7 +68,12 @@ import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } f
 import NotFound from '@/pages/not-found';
 import { downloadAnalytics } from '@/lib/analytics-export';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: (count, error) => !(error instanceof ApiError && error.status === 401) && count < 3 },
+    mutations: { retry: false },
+  },
+});
 
 const incidentClasses = Object.values(IncidentClass);
 const priorities = Object.values(Priority);
@@ -712,7 +719,7 @@ function Router() {
 function RoutedErrorBoundary({ children }: { children: ReactNode }) { const [location] = useLocation(); return <ErrorBoundary resetKey={location}>{children}</ErrorBoundary>; }
 
 function App() {
-  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><RoutedErrorBoundary><Router /></RoutedErrorBoundary></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>;
+  return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}><RoutedErrorBoundary><Router /></RoutedErrorBoundary></WouterRouter><DemoAccessDialog /><Toaster /></TooltipProvider></QueryClientProvider>;
 }
 
 export default App;

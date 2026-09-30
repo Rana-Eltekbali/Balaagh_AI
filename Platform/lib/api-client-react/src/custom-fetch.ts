@@ -6,7 +6,8 @@ export type ErrorType<T = unknown> = ApiError<T>;
 
 export type BodyType<T> = T;
 
-export type AuthTokenGetter = () => Promise<string | null> | string | null;
+export type AuthTokenGetter = (signal?: AbortSignal | null) => Promise<string | null> | string | null;
+export type UnauthorizedHandler = (rejectedToken: string | null) => void;
 
 const NO_BODY_STATUS = new Set([204, 205, 304]);
 const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
@@ -17,6 +18,7 @@ const DEFAULT_JSON_ACCEPT = "application/json, application/problem+json";
 
 let _baseUrl: string | null = null;
 let _authTokenGetter: AuthTokenGetter | null = null;
+let _unauthorizedHandler: UnauthorizedHandler | null = null;
 
 /**
  * Set a base URL that is prepended to every relative request URL
@@ -42,6 +44,11 @@ export function setBaseUrl(url: string | null): void {
  */
 export function setAuthTokenGetter(getter: AuthTokenGetter | null): void {
   _authTokenGetter = getter;
+}
+
+/** Notify the runtime UI of rejected credentials without retrying a write. */
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null): void {
+  _unauthorizedHandler = handler;
 }
 
 function isRequest(input: RequestInfo | URL): input is Request {
@@ -352,7 +359,9 @@ export async function customFetch<T = unknown>(
   // Attach bearer token when an auth getter is configured and no
   // Authorization header has been explicitly provided.
   if (_authTokenGetter && !headers.has("authorization")) {
-    const token = await _authTokenGetter();
+    const signal = init.signal ?? (isRequest(input) ? input.signal : undefined);
+    const token = await _authTokenGetter(signal);
+    if (signal?.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError");
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
     }
@@ -363,6 +372,10 @@ export async function customFetch<T = unknown>(
   const response = await fetch(input, { ...init, method, headers });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      const authorization = headers.get("authorization");
+      _unauthorizedHandler?.(authorization?.startsWith("Bearer ") ? authorization.slice(7) : null);
+    }
     const errorData = await parseErrorBody(response, method);
     throw new ApiError(response, errorData, requestInfo);
   }

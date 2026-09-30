@@ -38,7 +38,7 @@ Edit `.env` before starting. Generate a signing key using `python -c "import sec
 
 ## Configuration
 
-See `.env.example` for the full list. Required for real inference: `DATABASE_URL`, `CATEGORY_MODEL_PATH`, `PRIORITY_MODEL_PATH`, `LOCATION_MODEL_PATH`. Production additionally requires `APP_ENV=production` and `ANALYSIS_SIGNING_KEY`. `MODEL_DEVICE=cpu` is the default; `cuda` fails clearly if unavailable. `INFERENCE_MAX_CONCURRENCY`, queue timeout, token limits and database pool size are configurable.
+See `.env.example` for the full list. Required for real inference: `DATABASE_URL`, `CATEGORY_MODEL_PATH`, `PRIORITY_MODEL_PATH`, `LOCATION_MODEL_PATH`. Demo authentication is enabled by default and requires `DEMO_API_TOKEN` (32-512 non-whitespace ASCII characters). Production additionally requires `APP_ENV=production` and `ANALYSIS_SIGNING_KEY`, and rejects `DEMO_AUTH_ENABLED=false`. `MODEL_DEVICE=cpu` is the default; `cuda` fails clearly if unavailable. `INFERENCE_MAX_CONCURRENCY`, queue timeout, token limits and database pool size are configurable.
 
 Repository-local model paths, when running from `backend/`:
 
@@ -74,7 +74,7 @@ alembic upgrade head --sql
 
 Run migrations once per deployment before starting the API. Startup does not call `create_all`. `reports` stores reviewed fields, confidence columns, JSONB extracted entities/original predictions, initial summary source, UTC timestamps and numeric `analysis_time_ms`. `report_edits` stores report FK, field, before/after strings and timestamp. IDs are numeric. Incident/priority/location/creation and edit lookup timestamps have indexes; label/confidence constraints guard invalid data.
 
-Migration `0002_private_report_tables` enables RLS on `public.reports`, `public.report_edits` and `public.alembic_version`, and revokes PUBLIC/anon/authenticated privileges on those tables and their ID sequences. It creates no client policies. FastAPI continues to use its direct table-owner connection; RLS is not forced on the owner. Optional Supabase roles are checked before revocation, so ordinary PostgreSQL remains supported; SQLite tests skip the security statements. Downgrading this revision deliberately retains protections rather than reopening access. A future non-owner backend role needs an explicitly reviewed grant/policy before switching connections. Supabase service credentials remain server-only; this migration does not protect unauthenticated FastAPI routes.
+Migration `0002_private_report_tables` enables RLS on `public.reports`, `public.report_edits` and `public.alembic_version`, and revokes PUBLIC/anon/authenticated privileges on those tables and their ID sequences. It creates no client policies. FastAPI continues to use its direct table-owner connection; RLS is not forced on the owner. Optional Supabase roles are checked before revocation, so ordinary PostgreSQL remains supported; SQLite tests skip the security statements. Downgrading this revision deliberately retains protections rather than reopening access. A future non-owner backend role needs an explicitly reviewed grant/policy before switching connections. Supabase service credentials remain server-only; API access is separately protected by the shared demo bearer-key dependency.
 
 The legacy SQLite/demo store is not migrated automatically. Back up any existing data and explicitly review an import before using it as real reports.
 
@@ -98,6 +98,12 @@ VITE_API_BASE_URL=http://localhost:8000
 ```
 
 The value is the backend origin, without `/api`. Run `pnpm --dir Platform --filter @workspace/balaagh-ai dev` from the repository root. Keep the exact frontend origin in `CORS_ORIGINS`; no wildcard or credentials are used. For GitHub Pages, set repository Actions variable `VITE_API_BASE_URL` to the HTTPS backend origin and rebuild. Vite variables are build-time values. Location-filter choices now come from saved location summaries, so Arabic NER results are filterable. Existing browser-path deep links require a host SPA fallback; this backend does not serve the static frontend.
+
+## Demo access
+
+All application-data routes require `Authorization: Bearer <demo access key>`. `/api/healthz` and API documentation/schema endpoints stay public. A missing, malformed, duplicate or incorrect header returns 401 with `WWW-Authenticate: Bearer`. The shared key is held as a backend secret and compared in constant time; it is never returned or logged. Explicit `DEMO_AUTH_ENABLED=false` is available for isolated local testing only; the default is enabled and production cannot disable it.
+
+The React app asks for the key at runtime and stores it only in origin-scoped `sessionStorage`. The generated-client mutator attaches the header, pauses requests while the dialog is open, and clears rejected credentials on 401. Reauthentication preserves mounted form state and refreshes queries without replaying failed mutations. Lock demo clears the tab credential. Standard tab-session storage survives refresh and ends when the tab closes; browser session-restore features can restore session state, so use Lock demo on shared machines. No key belongs in `VITE_*`, source control, URLs, cookies or localStorage. See [DEMO_RUNBOOK.md](../DEMO_RUNBOOK.md) for private setup and verification.
 
 ## Endpoints
 
@@ -137,7 +143,7 @@ ruff format --check app tests scripts migrations
 python -m compileall -q app scripts migrations
 ```
 
-Tests use fake model adapters and temporary SQLite databases with the real Alembic migration. They do not download/load model weights or call an LLM. SQLite is allowed only for `APP_ENV=test`; production uses PostgreSQL/JSONB. Set `TEST_DATABASE_URL` to an empty, disposable `postgresql+asyncpg://...` database to run the PostgreSQL migration/CRUD/cascade test. The backend CI workflow provisions PostgreSQL for this test. Never point tests at production data.
+Tests use an ephemeral test-only bearer key, fake model adapters and temporary SQLite databases with the real Alembic migration. They do not download/load model weights or call an LLM. SQLite is allowed only for `APP_ENV=test`; production uses PostgreSQL/JSONB. Set `TEST_DATABASE_URL` to an empty, disposable `postgresql+asyncpg://...` database to run the PostgreSQL migration/CRUD/cascade test. The backend CI workflow provisions PostgreSQL for this test. Never point tests at production data.
 
 The real-model HTTP/Supabase/browser verification is recorded separately in [INTEGRATION_CHECK.md](INTEGRATION_CHECK.md). Both model-test invocation styles have subprocess import/argument tests; the already-working model behavior is unchanged.
 
@@ -169,7 +175,7 @@ docker compose run --rm api alembic upgrade head
 docker compose up -d api
 ```
 
-Use a reverse proxy for TLS, rate limits and request timeouts on a VM. Keep PostgreSQL private, restrict the API's inbound access as appropriate, and configure explicit CORS origins. No authentication system has been introduced: analyst CRUD is currently unauthenticated. Authentication/authorization, public intake rate limiting, pagination, deduplication and geocoding are follow-up work before public operational use. The current frontend still maps known location strings locally.
+Use a reverse proxy for TLS, rate limits and request timeouts on a VM. Keep PostgreSQL private, restrict the API's inbound access as appropriate, and configure explicit CORS origins. A shared bearer key protects demo API access. It grants all data operations to every key holder, with no individual accounts or roles. Per-user authentication/authorization, rate limiting, pagination, deduplication and geocoding remain follow-up work before public operational use. The current frontend still maps known location strings locally.
 
 ## Troubleshooting
 

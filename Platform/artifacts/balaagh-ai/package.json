@@ -8,9 +8,9 @@
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "predeploy": "pnpm run build:static",
+    "predeploy": "pnpm run build:pages",
     "deploy": "gh-pages -d dist/public",
-    "build:static": "cross-env VITE_STATIC_MODE=true vite build --config vite.config.ts && cp dist/public/index.html dist/public/404.html"
+    "build:pages": "pnpm run build && node scripts/prepare-pages.mjs"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
