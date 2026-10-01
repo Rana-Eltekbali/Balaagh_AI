@@ -67,6 +67,12 @@ import {
 import { Link, Route, Switch, useLocation, useParams, Router as WouterRouter } from 'wouter';
 import NotFound from '@/pages/not-found';
 import { downloadAnalytics } from '@/lib/analytics-export';
+import {
+  STATIC_DASHBOARD,
+  STATIC_LOCATIONS,
+  STATIC_ANALYTICS,
+  STATIC_REPORTS,
+} from '@/lib/static-demo-data';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -144,7 +150,7 @@ const fieldLabel: Record<string, string> = {
 };
 
 function Overview() {
-  const dashboard = useGetDashboardSummary();
+  const dashboard = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey(), placeholderData: STATIC_DASHBOARD } });
   const edits = useReportEdits();
   const data = dashboard.data;
   return <><PageTitle eyebrow="Situation overview" title="Situation Overview" description="Monitor, classify, and triage incoming Arabic crisis reports." action={<Link href="/analyze" data-testid="link-start-analysis" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="h-4 w-4" /> New analysis</Link>} />{dashboard.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36" />)}</div> : dashboard.isError ? <ErrorPanel onRetry={() => dashboard.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Total reports" value={data.totalReports} note="Total reports in the system" icon={ClipboardList} tone="blue" /><StatCard label="Critical reports" value={data.criticalReports} note="Requires immediate attention" icon={TriangleAlert} tone="red" /><StatCard label="High priority" value={data.highPriority} note="Across all locations" icon={AlertCircle} tone="amber" /><StatCard label="Reports today" value={data.reportsToday} note="Since midnight in the configured reporting timezone" icon={Clock3} tone="teal" /></div><div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold">Recent reports</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Most recently received reports</p></div><Link href="/reports" data-testid="link-view-all-reports" className="text-xs font-bold text-[hsl(var(--primary))]">View all <ArrowUpRight className="ml-1 inline h-3 w-3" /></Link></div>{data.recentReports?.length ? <div className="space-y-1">{data.recentReports.slice(0, 6).map(report => <ReportRow key={report.id} report={report} />)}</div> : <EmptyPanel title="No reports saved yet" text="No reports have been saved yet. Submit a report for analysis to populate the queue." action={<Link href="/analyze" data-testid="link-empty-analyze" className="mt-4 inline-flex text-sm font-semibold text-[hsl(var(--primary))]">Analyze a report <ArrowUpRight className="ml-1 h-4 w-4" /></Link>} />}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">Priority mix</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Saved reports by review level</p><BarList items={data.byPriority || []} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /><h2 className="mt-8 font-semibold">Incident classes</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Distribution across saved reports</p><BarList items={data.byIncidentClass || []} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></section></div>
@@ -213,7 +219,7 @@ function ResultCard({ result, onSave, saving, saved }: { result: AnalysisResult;
 
 
 function Reports() {
-  const locationSummary = useGetLocationsSummary();
+  const locationSummary = useGetLocationsSummary({ query: { queryKey: getGetLocationsSummaryQueryKey(), placeholderData: STATIC_LOCATIONS } });
   const locationOptions = locationSummary.data?.locations.map(row => row.location) ?? [];
   const [search, setSearch] = useState('');
   const [incident, setIncident] = useState('');
@@ -226,7 +232,7 @@ function Reports() {
     priority: priority ? priority as typeof priorities[number] : undefined,
     location: location || undefined,
     sort: sort as 'date' | 'priority' | 'incidentClass',
-  });
+  }, { query: { queryKey: getListReportsQueryKey(), placeholderData: STATIC_REPORTS } });
   const [showFilters, setShowFilters] = useState(false);
   const deleteReport = useDeleteReport();
   const qc = useQueryClient();
@@ -407,7 +413,7 @@ function resolveCoords(name: string): [number, number] | null {
 }
 
 function Locations() {
-  const locations = useGetLocationsSummary();
+  const locations = useGetLocationsSummary({ query: { queryKey: getGetLocationsSummaryQueryKey(), placeholderData: STATIC_LOCATIONS } });
   const rows = locations.data?.locations || [];
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -579,8 +585,8 @@ const emptyAnalyticsFilters: AnalyticsFilters = {
 function Analytics() {
   const [filters, setFilters] = useState<AnalyticsFilters>(emptyAnalyticsFilters);
   const [appliedFilters, setAppliedFilters] = useState<GetAnalyticsSummaryParams>({});
-  const analytics = useGetAnalyticsSummary(appliedFilters);
-  const locations = useGetLocationsSummary();
+  const analytics = useGetAnalyticsSummary(appliedFilters, { query: { queryKey: getGetAnalyticsSummaryQueryKey(appliedFilters), placeholderData: STATIC_ANALYTICS } });
+  const locations = useGetLocationsSummary({ query: { queryKey: getGetLocationsSummaryQueryKey(), placeholderData: STATIC_LOCATIONS } });
   const data = analytics.data;
   const hasFilters = Object.keys(appliedFilters).length > 0;
   const invalidDates = Boolean(filters.dateFrom && filters.dateTo && filters.dateFrom > filters.dateTo);
