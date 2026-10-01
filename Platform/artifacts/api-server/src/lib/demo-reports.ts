@@ -1,6 +1,6 @@
 import type { InsertReport } from "@workspace/db";
 
-export type DemoReport = InsertReport & { analysisTime: string; _offsetHours: number };
+export type DemoReport = Omit<InsertReport, 'relevance'> & { analysisTime: string; _offsetHours: number };
 
 /**
  * 20 varied demo reports.
