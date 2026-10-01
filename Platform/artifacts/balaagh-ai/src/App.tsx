@@ -648,250 +648,35 @@ function Evaluation({ data }: { data: AnalyticsSummary['evaluation'] }) {
 }
 
 function About() {
-  const teamMembers = [
-    { name: 'Alla Elsharif', role: 'Backend & frontend development, AI integration, dashboard' },
-    { name: 'Ritaj Benabdullah', role: 'Backend & frontend development, AI integration, dashboard' },
-    { name: 'Rana Etekbali', role: 'Python notebook preparation, final report & documentation' },
-    { name: 'Reem BenGuma', role: 'Python notebook preparation, final report & documentation' },
-    { name: 'Nosaiba BenZahia', role: 'Presentation preparation & design' },
-    { name: 'Nouralhuda Belaid', role: 'Presentation preparation & design' },
-  ];
-
-  const models = [
-    { name: 'TF-IDF + Logistic Regression', incidentAcc: '78.4%', incidentF1: '77.1%', priorityAcc: '53.4%', priorityF1: '52.6%' },
-    { name: 'TF-IDF + Linear SVM', incidentAcc: '77.1%', incidentF1: '75.9%', priorityAcc: '53.4%', priorityF1: '52.6%' },
-    { name: 'AraBERT', incidentAcc: '91.5%', incidentF1: '91.3%', priorityAcc: '71.2%', priorityF1: '71.7%', best: true },
-    { name: 'CAMeLBERT-DA', incidentAcc: '87.3%', incidentF1: '87.1%', priorityAcc: '58.1%', priorityF1: '58.7%' },
-  ];
-
-  const incidentCategories = [
-    { label: 'Fire / Explosion', desc: 'Events involving fires or explosions.' },
-    { label: 'Flood / Severe Weather', desc: 'Natural disasters such as flooding, storms, or extreme weather.' },
-    { label: 'Infrastructure / Utilities', desc: 'Failures or damage to electricity, water, communications, or essential services.' },
-    { label: 'Road / Transportation', desc: 'Accidents, blockages, or hazards affecting roads, vehicles, or public transport.' },
-    { label: 'People at Risk / Medical', desc: 'Situations where individuals are endangered, injured, trapped, or require urgent medical assistance.' },
-    { label: 'Other', desc: 'Miscellaneous incidents that do not fit into the defined categories.' },
-  ];
-
-  const priorities = [
-    { level: 'Low', tone: 'bg-slate-50 text-slate-700 border-slate-200', desc: 'Localized, minor incident; minimal threat, routine response sufficient.' },
-    { level: 'Medium', tone: 'bg-blue-50 text-blue-700 border-blue-200', desc: 'Contained but significant incident; some risk or injury, limited evacuation possibly required.' },
-    { level: 'High', tone: 'bg-amber-50 text-amber-700 border-amber-200', desc: 'Serious incident involving deaths or major injuries, significant infrastructure disruption, or multi-agency response.' },
-    { level: 'Critical', tone: 'bg-red-50 text-red-700 border-red-200', desc: 'Extreme incident involving mass casualties, widespread destruction, or critical infrastructure failure.' },
-  ];
-
-  const milestones = [
-    { period: 'Sep 2–15', activity: 'Form the project team and explore potential project ideas.', milestone: 'Project idea selected' },
-    { period: 'Sep 15–20', activity: 'Review, clean, and label the collected data; define classification and prioritization criteria.', milestone: 'Dataset prepared and labeled' },
-    { period: 'Sep 21–27', activity: 'Train, evaluate, and compare AI models; select the most suitable approaches; build the application interface.', milestone: 'Model comparison completed' },
-    { period: 'Sep 28–30', activity: 'Develop backend and frontend, integrate AI models, implement dashboard, and prepare demo content.', milestone: 'Integrated prototype completed' },
-    { period: 'Oct 1', activity: 'Finalize the core system and conduct comprehensive testing.', milestone: 'System testing completed' },
-    { period: 'Oct 2–4', activity: 'Finalize report, presentation, notebook, and project documentation; apply final improvements.', milestone: 'Final project materials completed' },
-    { period: 'Oct 5', activity: 'Submit the final presentation, project report, and Work Breakdown Structure (WBS).', milestone: 'Final submission completed' },
-  ];
-
   return (
     <div className="-mx-5 -mt-8 min-h-[calc(100dvh-72px)] px-5 py-10 sm:-mx-8 sm:px-8 lg:py-16">
-      <div className="mx-auto max-w-4xl space-y-16">
-
-        {/* ── Header ── */}
-        <div>
-          <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]">
-            <ShieldCheck className="h-4 w-4" /> Balaagh AI / About
-          </p>
-          <h1 className="max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-.045em] sm:text-6xl">About Balaagh AI</h1>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[hsl(var(--muted-foreground))]">
-            AI-Powered Crisis Report Analysis and Decision-Support Platform — a university capstone prototype for turning unstructured Arabic reports in the Libyan context into a reviewable set of signals.
-          </p>
-          <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-            Samsung Innovation Campus · ECE · Submitted October 5, 2026
-          </p>
-        </div>
-
-        {/* ── Core cards ── */}
-        <div className="grid gap-5 md:grid-cols-3">
+      <div className="mx-auto max-w-4xl">
+        <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]">
+          <ShieldCheck className="h-4 w-4" /> Balaagh AI / About
+        </p>
+        <h1 className="max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-.045em] sm:text-6xl">About Balaagh AI</h1>
+        <p className="mt-6 max-w-2xl text-lg leading-8 text-[hsl(var(--muted-foreground))]">
+          Balaagh AI is a university capstone prototype for turning unstructured Arabic reports in the Libyan context into a reviewable set of signals.
+        </p>
+        <div className="mt-12 grid gap-5 md:grid-cols-3">
           <AboutCard number="01" title="Purpose" text="Help analysts move from a long Arabic report to a consistent structured record without losing the original wording." />
-          <AboutCard number="02" title="AI Approach" text="AraBERT classifies incident category and priority. MARBERT extracts Libyan locations. A unified multi-task model combines all three tasks in a single MARBERT encoder." />
-          <AboutCard number="03" title="Operational Scope" text="Balaagh AI is a classification and review tool, not emergency dispatch software. All outputs require human verification before operational action." />
+          <AboutCard number="02" title="AI approach" text="AraBERT classifies incident category and priority. MARBERT extracts Libyan locations. A unified multi-task MARBERT model handles all three tasks jointly." />
+          <AboutCard number="03" title="Operational scope" text="Balaagh AI is a classification and review tool, not emergency dispatch software. All outputs require human verification before operational action." />
         </div>
-
-        {/* ── Background ── */}
-        <section className="rounded-2xl border border-[hsl(var(--border))] bg-white/80 p-6 sm:p-8">
+        <div className="mt-7 rounded-2xl border border-[hsl(var(--border))] bg-white/80 p-6 sm:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-semibold">Background &amp; Motivation</h2>
+              <h2 className="font-semibold">How the analysis is structured</h2>
               <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-                During emergency and crisis situations, large numbers of reports may be submitted within a short period. Arabic text varies in spelling, vocabulary, writing style, and formality. In the Libyan context, reports may contain local expressions, informal wording, abbreviations, and different spellings of the same city or landmark.
-              </p>
-              <p className="mt-3 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-                Balaagh AI explores how AI can support crisis report handling in Libya by organizing important information in a clear and structured form, keeping human reviewers responsible for the final interpretation and response.
+                Arabic reports are processed by trained category, priority, and location models. Analysts review the resulting fields and can correct saved records. Required support starts empty and can be supplied during review.
               </p>
             </div>
           </div>
-        </section>
-
-        {/* ── Dataset ── */}
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">Dataset</h2>
-          <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-            The project uses two complementary datasets. The <strong>IDRISI-RA</strong> public dataset (3,696 Arabic crisis tweets) was used for location-model pre-training. The <strong>Balaagh dataset</strong> (1,180 Libya-specific reports — 317 real, 863 generated) was used for fine-tuning and final evaluation. It was split 70 / 10 / 20 into train / validation / test sets using stratified splitting.
-          </p>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
-              <h3 className="mb-4 text-sm font-semibold">Incident Categories</h3>
-              <ul className="space-y-2">
-                {incidentCategories.map(c => (
-                  <li key={c.label} className="flex gap-2 text-sm">
-                    <span className="mt-px h-2 w-2 shrink-0 translate-y-[5px] rounded-full bg-[hsl(var(--primary))]" />
-                    <span><strong>{c.label}:</strong> <span className="text-[hsl(var(--muted-foreground))]">{c.desc}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
-              <h3 className="mb-4 text-sm font-semibold">Priority Levels</h3>
-              <ul className="space-y-3">
-                {priorities.map(p => (
-                  <li key={p.level} className="flex items-start gap-3 text-sm">
-                    <span className={`mt-px shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${p.tone}`}>{p.level}</span>
-                    <span className="text-[hsl(var(--muted-foreground))]">{p.desc}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Training Methodology ── */}
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">Training Methodology</h2>
-          <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-            Four classification configurations were trained and compared. Two traditional ML baselines used TF-IDF feature extraction; two transformer models were fine-tuned end-to-end. Location extraction used a two-stage MARBERT fine-tuning approach (IDRISI-RA → Balaagh dataset). A unified multi-task MARBERT model jointly trained all three tasks.
-          </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            {[
-              { title: 'TF-IDF + Logistic Regression', body: 'Unigrams & bigrams, 50k features, sublinear TF. C=10.0 selected by validation sweep. Class-balanced weighting.' },
-              { title: 'TF-IDF + Linear SVM', body: 'Same TF-IDF configuration. C=5.0 selected by validation sweep. Class-balanced weighting, max 2000 iterations.' },
-              { title: 'AraBERT (aubmindlab/bert-base-arabertv02)', body: 'Fine-tuned with two parallel classification heads for incident type (6 classes) and priority (4 classes). Joint cross-entropy loss with class weights. Best checkpoint: Epoch 4.' },
-              { title: 'CAMeLBERT-DA (camelbert-da)', body: 'Pretrained on dialectal Arabic corpora, fine-tuned for Libyan Arabic reports. Same dual-head architecture as AraBERT. Best checkpoint: Epoch 4.' },
-              { title: 'MARBERT — Location Extraction (NER)', body: 'Two-stage fine-tuning: IDRISI-RA pre-training → Balaagh fine-tuning. BIO token labels (B-LOC, I-LOC, O). Fast tokenizer with offset mapping for span alignment.' },
-              { title: 'Unified Multi-task MARBERT', body: 'Single shared encoder, three task heads (NER + incident + priority). Joint loss L_total = L_NER + L_Category + L_Priority. Best composite score at Epoch 8 (S=0.7592).' },
-            ].map(m => (
-              <div key={m.title} className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5">
-                <p className="text-sm font-semibold">{m.title}</p>
-                <p className="mt-2 text-xs leading-6 text-[hsl(var(--muted-foreground))]">{m.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Model Results ── */}
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">Model Comparison</h2>
-          <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-            All models were evaluated on the held-out test set. AraBERT achieved the highest performance on both tasks. Priority-level classification was consistently harder than incident-type classification across all models.
-          </p>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-[hsl(var(--border))]">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.5)]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold">Model</th>
-                  <th className="px-4 py-3 text-right font-semibold">Incident Acc.</th>
-                  <th className="px-4 py-3 text-right font-semibold">Incident F1</th>
-                  <th className="px-4 py-3 text-right font-semibold">Priority Acc.</th>
-                  <th className="px-4 py-3 text-right font-semibold">Priority F1</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[hsl(var(--border))] bg-white">
-                {models.map(m => (
-                  <tr key={m.name} className={m.best ? 'bg-[hsl(var(--secondary)/.3)]' : ''}>
-                    <td className="px-4 py-3 font-medium">
-                      {m.name}
-                      {m.best && <span className="ml-2 rounded-full bg-[hsl(var(--primary))] px-2 py-0.5 text-[10px] font-bold text-white">Best</span>}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{m.incidentAcc}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{m.incidentF1}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{m.priorityAcc}</td>
-                    <td className="px-4 py-3 text-right tabular-nums">{m.priorityF1}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── System Design ── */}
-        <section className="rounded-2xl border border-[hsl(var(--border))] bg-white/80 p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
-              <BarChart3 className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-semibold">System Design</h2>
-              <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-                Balaagh AI is designed as a layered web-based system: a <strong>presentation layer</strong> (Analyze Report, Dashboard, Saved Reports, Locations, Analytics); an <strong>application layer</strong> managing communication between the interface and AI components; an <strong>AI processing layer</strong> performing incident-category classification, priority-level prediction, and location extraction; and a <strong>data layer</strong> storing original reports, predictions, saved analyses, and analyst corrections.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Team ── */}
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">Team</h2>
-          <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-            All team members contributed to data collection, labeling, model training, evaluation, and system testing. The table below reflects each member's primary responsibility.
-          </p>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-[hsl(var(--border))]">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.5)]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold">Name</th>
-                  <th className="px-4 py-3 text-left font-semibold">Primary Responsibility</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[hsl(var(--border))] bg-white">
-                {teamMembers.map(m => (
-                  <tr key={m.name}>
-                    <td className="px-4 py-3 font-medium">{m.name}</td>
-                    <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">{m.role}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── Timeline ── */}
-        <section>
-          <h2 className="text-xl font-semibold tracking-tight">Schedule &amp; Milestones</h2>
-          <div className="mt-6 overflow-x-auto rounded-2xl border border-[hsl(var(--border))]">
-            <table className="w-full text-sm">
-              <thead className="border-b border-[hsl(var(--border))] bg-[hsl(var(--secondary)/.5)]">
-                <tr>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Period</th>
-                  <th className="px-4 py-3 text-left font-semibold">Main Activities</th>
-                  <th className="px-4 py-3 text-left font-semibold whitespace-nowrap">Milestone</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[hsl(var(--border))] bg-white">
-                {milestones.map(m => (
-                  <tr key={m.period}>
-                    <td className="px-4 py-3 font-medium whitespace-nowrap">{m.period}</td>
-                    <td className="px-4 py-3 text-[hsl(var(--muted-foreground))]">{m.activity}</td>
-                    <td className="px-4 py-3 text-[hsl(var(--muted-foreground))] whitespace-nowrap">{m.milestone}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        {/* ── Responsible use ── */}
-        <div className="rounded-2xl border border-[hsl(var(--accent)/.35)] bg-white/80 p-6 sm:p-8">
+        </div>
+        <div className="mt-5 rounded-2xl border border-[hsl(var(--accent)/.35)] bg-white/80 p-6 sm:p-8">
           <div className="flex gap-4">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
               <Info className="h-5 w-5" />
@@ -904,8 +689,7 @@ function About() {
             </div>
           </div>
         </div>
-
-        <Link href="/" data-testid="link-about-home" className="inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--primary))]">
+        <Link href="/" data-testid="link-about-home" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--primary))]">
           <ArrowLeft className="h-4 w-4" /> Return to dashboard
         </Link>
       </div>
