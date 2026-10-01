@@ -30,10 +30,10 @@ function seed() {
 
   const now = new Date();
 
-  // 10 demo reports — most recent, spaced 30 min apart
-  demoReports.forEach((r, i) => {
-    const d = new Date(now);
-    d.setMinutes(d.getMinutes() - i * 30);
+  // 20 demo reports — timestamps driven by each entry's _offsetHours
+  demoReports.forEach((r) => {
+    const offsetMs = (r._offsetHours ?? 0) * 60 * 60 * 1000;
+    const d = new Date(now.getTime() - offsetMs);
     rows.push({
       id: nextId++,
       originalText: r.originalText,
@@ -45,7 +45,7 @@ function seed() {
       summary: r.summary,
       createdAt: d.toISOString(),
       updatedAt: d.toISOString(),
-      analysisTime: (r as any).analysisTime ?? "2.0s",
+      analysisTime: r.analysisTime ?? "2.0s",
     });
   });
 

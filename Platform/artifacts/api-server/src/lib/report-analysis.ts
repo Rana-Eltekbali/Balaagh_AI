@@ -81,6 +81,7 @@ export function analyzeReportText(text: string): Analysis {
     location,
     peopleAtRisk,
     requiredSupport,
+    relevance: "",
     summary,
   };
 }
