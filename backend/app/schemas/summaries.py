@@ -16,6 +16,7 @@ class DashboardSummary(ApiModel):
     recent_reports: list[Report]
     by_incident_class: list[CountItem]
     by_priority: list[CountItem]
+    by_location: list[CountItem] = Field(default_factory=list)
 
 
 class LocationSummary(ApiModel):

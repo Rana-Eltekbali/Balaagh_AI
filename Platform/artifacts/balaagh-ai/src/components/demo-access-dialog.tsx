@@ -21,7 +21,7 @@ export function DemoAccessDialog() {
     setError('');
     try {
       // Validate through the same generated client; the candidate is not persisted yet.
-      await getDashboardSummary({ headers: { Authorization: `Bearer ${key}` } });
+      await getDashboardSummary(undefined, { headers: { Authorization: `Bearer ${key}` } });
       acceptDemoToken(key);
       setKey('');
       // Re-fetch reads after reauthentication. Failed mutations require an explicit retry.

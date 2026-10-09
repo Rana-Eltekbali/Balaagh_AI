@@ -16,6 +16,13 @@ const ago = (hours: number): string => {
   return d.toISOString();
 };
 
+// days ago helper (for older reports)
+const daysAgo = (days: number, hour = 10): string => {
+  const d = new Date(Date.now() - days * 86_400_000);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+};
+
 // ── 30 demo reports ───────────────────────────────────────────────────────────
 export const STATIC_REPORTS: Report[] = [
   {
@@ -430,14 +437,30 @@ function toCountItems(m: Record<string, number>): { label: string; count: number
 const todayStart = new Date();
 todayStart.setHours(0, 0, 0, 0);
 
+// Reports created within the last 24 hours (matches ago() helper)
+const last24h = new Date(Date.now() - 24 * 3_600_000);
+const todayReports = STATIC_REPORTS.filter(r => new Date(r.createdAt) >= last24h);
+
 export const STATIC_DASHBOARD: DashboardSummary = {
   totalReports: STATIC_REPORTS.length,
   criticalReports: STATIC_REPORTS.filter(r => r.priority === 'Critical').length,
   highPriority: STATIC_REPORTS.filter(r => r.priority === 'High').length,
-  reportsToday: STATIC_REPORTS.filter(r => new Date(r.createdAt) >= todayStart).length,
+  reportsToday: todayReports.length,
   recentReports: STATIC_REPORTS.slice(0, 6),
   byIncidentClass: toCountItems(count(STATIC_REPORTS, 'incidentClass')),
   byPriority: toCountItems(count(STATIC_REPORTS, 'priority')),
+  byLocation: toCountItems(count(STATIC_REPORTS, 'location')),
+};
+
+export const STATIC_DASHBOARD_TODAY: DashboardSummary = {
+  totalReports: todayReports.length,
+  criticalReports: todayReports.filter(r => r.priority === 'Critical').length,
+  highPriority: todayReports.filter(r => r.priority === 'High').length,
+  reportsToday: todayReports.length,
+  recentReports: todayReports.slice(0, 6),
+  byIncidentClass: toCountItems(count(todayReports, 'incidentClass')),
+  byPriority: toCountItems(count(todayReports, 'priority')),
+  byLocation: toCountItems(count(todayReports, 'location')),
 };
 
 function buildLocationsSummary(): LocationsSummary {

@@ -69,6 +69,7 @@ import NotFound from '@/pages/not-found';
 import { downloadAnalytics } from '@/lib/analytics-export';
 import {
   STATIC_DASHBOARD,
+  STATIC_DASHBOARD_TODAY,
   STATIC_LOCATIONS,
   STATIC_ANALYTICS,
   STATIC_REPORTS,
@@ -119,7 +120,7 @@ function StatCard({ label, value, note, icon: Icon, tone = 'blue' }: { label: st
 }
 
 function PageTitle({ eyebrow, title, description, action }: { eyebrow: string; title: string; description: string; action?: ReactNode }) {
-  return <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />{eyebrow}</p><h1 className="text-3xl font-semibold tracking-[-.03em] text-[hsl(var(--foreground))] sm:text-4xl">{title}</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">{description}</p></div>{action}</div>;
+  return <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div>{eyebrow && <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]"><span className="h-1.5 w-1.5 rounded-full bg-[hsl(var(--accent))]" />{eyebrow}</p>}<h1 className="text-3xl font-semibold tracking-[-.03em] text-[hsl(var(--foreground))] sm:text-4xl">{title}</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-[hsl(var(--muted-foreground))]">{description}</p></div>{action}</div>;
 }
 
 function Shell({ children }: { children: ReactNode }) {
@@ -133,7 +134,7 @@ function Shell({ children }: { children: ReactNode }) {
     { href: '/analytics', label: 'Analytics', icon: BarChart3 },
     { href: '/about', label: 'About Project', icon: CircleHelp },
   ];
-  return <div className="app-shell min-h-[100dvh] text-[hsl(var(--foreground))]"><aside className={cn('fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))] px-4 py-5 transition-transform duration-300 lg:translate-x-0', mobileOpen ? 'translate-x-0' : '-translate-x-full')}><div className="flex items-center gap-3 px-3"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-5 w-5" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p><p className="text-[10px] uppercase tracking-[.2em] text-[hsl(var(--sidebar-foreground)/.62)]">AI-Powered Command Center</p></div></div><div className="my-8 h-px bg-[hsl(var(--sidebar-border))]" /><nav className="space-y-1">{items.map(item => { const active = item.href === '/' ? location === '/' : location.startsWith(item.href); const Icon = item.icon; const cls = cn('group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors', active ? 'bg-[hsl(var(--sidebar-accent))] text-white' : 'text-[hsl(var(--sidebar-foreground)/.72)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-white'); const iconCls = cn('h-[18px] w-[18px]', active ? 'text-[hsl(var(--sidebar-primary))]' : 'text-[hsl(var(--sidebar-foreground)/.62)]'); return (item as any).newTab ? <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</a> : <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</Link>; })}</nav><div className="mt-auto pt-4 border-t border-[hsl(var(--sidebar-border))]"><a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/submit`} target="_blank" rel="noopener noreferrer" data-testid="link-nav-public-intake" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[hsl(var(--sidebar-foreground)/.72)] transition-colors hover:bg-[hsl(var(--sidebar-accent))] hover:text-white"><Send className="h-[18px] w-[18px] text-[hsl(var(--sidebar-foreground)/.62)]" />قدم بلاغ</a></div></aside>{mobileOpen && <button aria-label="Close navigation" data-testid="button-close-nav" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-[hsl(216_43%_18%/.35)] lg:hidden" /> }<main className="min-h-[100dvh] lg:pl-[260px]"><div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div></main></div>;
+  return <div className="app-shell min-h-[100dvh] text-[hsl(var(--foreground))]"><aside className={cn('fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col border-r border-[hsl(var(--sidebar-border))] bg-[hsl(var(--sidebar))] px-4 py-5 transition-transform duration-300 lg:translate-x-0', mobileOpen ? 'translate-x-0' : '-translate-x-full')}><div className="flex items-center gap-3 px-3"><div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-6 w-6" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p><p className="text-[10px] uppercase tracking-[.2em] text-[hsl(var(--sidebar-foreground)/.62)]">AI-Powered Command Center</p></div></div><div className="my-8 h-px bg-[hsl(var(--sidebar-border))]" /><nav className="space-y-1">{items.map(item => { const active = item.href === '/' ? location === '/' : location.startsWith(item.href); const Icon = item.icon; const cls = cn('group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors', active ? 'bg-[hsl(var(--sidebar-accent))] text-white' : 'text-[hsl(var(--sidebar-foreground)/.72)] hover:bg-[hsl(var(--sidebar-accent))] hover:text-white'); const iconCls = cn('h-[18px] w-[18px]', active ? 'text-[hsl(var(--sidebar-primary))]' : 'text-[hsl(var(--sidebar-foreground)/.62)]'); return (item as any).newTab ? <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</a> : <Link key={item.href} href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMobileOpen(false)} className={cls}><Icon className={iconCls} />{item.label}</Link>; })}</nav><div className="mt-auto pt-4 border-t border-[hsl(var(--sidebar-border))]"><a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/submit`} target="_blank" rel="noopener noreferrer" data-testid="link-nav-public-intake" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-[hsl(var(--sidebar-foreground)/.72)] transition-colors hover:bg-[hsl(var(--sidebar-accent))] hover:text-white"><Send className="h-[18px] w-[18px] text-[hsl(var(--sidebar-foreground)/.62)]" />قدم بلاغ</a></div></aside>{mobileOpen && <button aria-label="Close navigation" data-testid="button-close-nav" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-[hsl(216_43%_18%/.35)] lg:hidden" /> }<main className="min-h-[100dvh] lg:pl-[260px]"><div className="mx-auto max-w-[1440px] p-5 sm:p-8">{children}</div></main></div>;
 }
 
 function useReportEdits() {
@@ -150,10 +151,17 @@ const fieldLabel: Record<string, string> = {
 };
 
 function Overview() {
-  const dashboard = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey(), placeholderData: STATIC_DASHBOARD } });
+  const [filter, setFilter] = useState<'today' | 'all'>('today');
+  const dashboard = useGetDashboardSummary(filter, { query: { queryKey: getGetDashboardSummaryQueryKey(filter), placeholderData: filter === 'today' ? STATIC_DASHBOARD_TODAY : STATIC_DASHBOARD } });
   const edits = useReportEdits();
   const data = dashboard.data;
-  return <><PageTitle eyebrow="Situation overview" title="Situation Overview" description="Monitor, classify, and triage incoming Arabic crisis reports." action={<Link href="/analyze" data-testid="link-start-analysis" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="h-4 w-4" /> New analysis</Link>} />{dashboard.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36" />)}</div> : dashboard.isError ? <ErrorPanel onRetry={() => dashboard.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Total reports" value={data.totalReports} note="Total reports in the system" icon={ClipboardList} tone="blue" /><StatCard label="Critical reports" value={data.criticalReports} note="Requires immediate attention" icon={TriangleAlert} tone="red" /><StatCard label="High priority" value={data.highPriority} note="Across all locations" icon={AlertCircle} tone="amber" /><StatCard label="Reports today" value={data.reportsToday} note="Since midnight in the configured reporting timezone" icon={Clock3} tone="teal" /></div><div className="mt-6 grid gap-6 xl:grid-cols-[1.35fr_.65fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold">Recent reports</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Most recently received reports</p></div><Link href="/reports" data-testid="link-view-all-reports" className="text-xs font-bold text-[hsl(var(--primary))]">View all <ArrowUpRight className="ml-1 inline h-3 w-3" /></Link></div>{data.recentReports?.length ? <div className="space-y-1">{data.recentReports.slice(0, 6).map(report => <ReportRow key={report.id} report={report} />)}</div> : <EmptyPanel title="No reports saved yet" text="No reports have been saved yet. Submit a report for analysis to populate the queue." action={<Link href="/analyze" data-testid="link-empty-analyze" className="mt-4 inline-flex text-sm font-semibold text-[hsl(var(--primary))]">Analyze a report <ArrowUpRight className="ml-1 h-4 w-4" /></Link>} />}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><h2 className="font-semibold">Priority mix</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Saved reports by review level</p><BarList items={data.byPriority || []} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /><h2 className="mt-8 font-semibold">Incident classes</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Distribution across saved reports</p><BarList items={data.byIncidentClass || []} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></section></div>
+  return <>
+    <PageTitle eyebrow="" title="Situation Overview" description="Monitor, classify, and triage incoming Arabic crisis reports." action={<Link href="/analyze" data-testid="link-start-analysis" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"><Plus className="h-4 w-4" /> New analysis</Link>} />
+    <div className="mb-5 flex items-center gap-2">
+      <button onClick={() => setFilter('today')} className={cn('rounded-lg px-4 py-1.5 text-sm font-semibold transition', filter === 'today' ? 'bg-[hsl(var(--primary))] text-white' : 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--secondary))]')}>Today</button>
+      <button onClick={() => setFilter('all')} className={cn('rounded-lg px-4 py-1.5 text-sm font-semibold transition', filter === 'all' ? 'bg-[hsl(var(--primary))] text-white' : 'bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--secondary))]')}>All time</button>
+    </div>
+    {dashboard.isLoading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-36" />)}</div> : dashboard.isError ? <ErrorPanel onRetry={() => dashboard.refetch()} /> : data ? <><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="Total reports" value={data.totalReports} note={filter === 'today' ? "Today's reports" : "Total reports in the system"} icon={ClipboardList} tone="blue" /><StatCard label="Critical reports" value={data.criticalReports} note="Requires immediate attention" icon={TriangleAlert} tone="red" /><StatCard label="High priority" value={data.highPriority} note="Across all locations" icon={AlertCircle} tone="amber" /><StatCard label="Locations" value={data.byLocation?.length ?? 0} note="Areas with active reports" icon={MapPin} tone="teal" /></div><div className="mt-6"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-6"><div className="mb-5 flex items-center justify-between"><div><h2 className="font-semibold">Recent reports</h2><p className="mt-1 text-xs text-[hsl(var(--muted-foreground))]">Most recently received reports</p></div><Link href="/reports" data-testid="link-view-all-reports" className="text-xs font-bold text-[hsl(var(--primary))]">View all <ArrowUpRight className="ml-1 inline h-3 w-3" /></Link></div>{data.recentReports?.length ? <div className="space-y-1">{data.recentReports.slice(0, 6).map(report => <ReportRow key={report.id} report={report} />)}</div> : <EmptyPanel title="No reports saved yet" text="No reports have been saved yet. Submit a report for analysis to populate the queue." action={<Link href="/analyze" data-testid="link-empty-analyze" className="mt-4 inline-flex text-sm font-semibold text-[hsl(var(--primary))]">Analyze a report <ArrowUpRight className="ml-1 h-4 w-4" /></Link>} />}</section></div>
 
 {/* Edited reports section */}
 <div className="mt-6">
@@ -193,7 +201,21 @@ function Overview() {
 }
 
 function ReportRow({ report }: { report: Report }) {
-  return <Link href={`/reports/${report.id}`} data-testid={`link-report-${report.id}`} className="group flex items-center justify-between gap-4 rounded-xl p-3 transition-colors hover:bg-[hsl(var(--muted)/.55)]"><div className="flex min-w-0 items-center gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><FileSearch className="h-4 w-4" /></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{incidentShort(report.incidentClass)}</p><p className="mt-0.5 truncate text-xs text-[hsl(var(--muted-foreground))]">{report.location || 'Location pending'} · {formatDate(report.createdAt)}</p></div></div><div className="flex shrink-0 items-center gap-3"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge><ArrowUpRight className="hidden h-4 w-4 text-[hsl(var(--muted-foreground))] group-hover:block" /></div></Link>;
+  return <Link href={`/reports/${report.id}`} data-testid={`link-report-${report.id}`} className="group flex flex-col gap-2 rounded-xl p-3 transition-colors hover:bg-[hsl(var(--muted)/.55)]">
+    <div className="flex items-start justify-between gap-4">
+      <div className="flex min-w-0 items-start gap-3">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><FileSearch className="h-4 w-4" /></div>
+        <div className="min-w-0">
+          <p className="truncate text-xs text-[hsl(var(--muted-foreground))]"><span>{report.location || 'Location pending'}</span> · <span dir="ltr">{formatDate(report.createdAt)}</span></p>
+          <p className="mt-1 line-clamp-2 text-sm leading-6 text-[hsl(var(--foreground))]">{report.originalText}</p>
+        </div>
+      </div>
+      <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <Badge className={priorityTone(report.priority)}>{report.priority}</Badge>
+        <span className="text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(report.incidentClass)}</span>
+      </div>
+    </div>
+  </Link>;
 }
 
 function BarList({ items, colors }: { items: CountItem[]; colors: string[] }) {
@@ -209,7 +231,7 @@ function Analyze() {
   const qc = useQueryClient();
   const submit = () => { if (text.trim().length >= 5) analyze.mutate({ data: { text: text.trim() } }, { onSuccess: (value) => { setResult(value); create.reset(); } }); };
   const save = () => { if (!result) return; create.mutate({ data: { originalText: text.trim(), ...result } }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListReportsQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetLocationsSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetAnalyticsSummaryQueryKey() }); } }); };
-  return <><PageTitle eyebrow="Analysis workspace" title="Analyze Report" description="Submit an Arabic report for automated classification, then review all extracted fields before saving." /><div className="grid gap-6 xl:grid-cols-[.95fr_1.05fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">INPUT</p><h2 className="mt-1 text-lg font-semibold">Original Arabic report</h2></div></div><textarea dir="rtl" value={text} onChange={e => { setText(e.target.value); setResult(undefined); create.reset(); }} maxLength={5000} disabled={analyze.isPending || create.isPending} data-testid="textarea-report" placeholder="مثال: يوجد حريق في منزل بجنزور وهناك طفلان داخل البيت" className="arabic-copy min-h-[300px] w-full resize-y rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-5 text-base text-[hsl(var(--foreground))] outline-none transition focus:border-[hsl(var(--accent))] focus:ring-4 focus:ring-[hsl(var(--accent)/.12)]" /><div className="mt-4 flex items-center justify-between gap-3"><span className="text-xs text-[hsl(var(--muted-foreground))]">{text.length} characters</span><Button onClick={submit} disabled={text.trim().length < 5 || analyze.isPending || create.isPending} data-testid="button-analyze-report">{analyze.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Structuring report</> : <><Sparkles className="h-4 w-4" /> Analyze report</>}</Button></div>{analyze.isError && <div className="mt-4"><ErrorPanel message="The analysis service did not respond. Your original text is still here." onRetry={submit} /></div>}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">STRUCTURED OUTPUT</p><h2 className="mt-1 text-lg font-semibold">Structured result</h2></div>{result && <Badge className="border-[hsl(var(--accent)/.35)] bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Check className="mr-1 h-3 w-3" />Analysis complete</Badge>}</div>{result ? <ResultCard result={result} onSave={save} saving={create.isPending} saved={create.isSuccess} /> : <div className="grid min-h-[300px] place-items-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--background))] p-8 text-center"><div><div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Sparkles className="h-5 w-5" /></div><h3 className="font-semibold">Awaiting report submission</h3><p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[hsl(var(--muted-foreground))]">Classification results will populate here after a report is submitted.</p></div></div>}</section></div>{create.isError && <ErrorPanel message="The report could not be saved. Analyze again if the analysis has expired." onRetry={save} />}</>;
+  return <><PageTitle eyebrow="" title="Analyze Report" description="Submit an Arabic report for automated classification, then review all extracted fields before saving." /><div className="grid gap-6 xl:grid-cols-[.95fr_1.05fr]"><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">INPUT</p><h2 className="mt-1 text-lg font-semibold">Original Arabic report</h2></div></div><textarea dir="rtl" value={text} onChange={e => { setText(e.target.value); setResult(undefined); create.reset(); }} maxLength={5000} disabled={analyze.isPending || create.isPending} data-testid="textarea-report" placeholder="اكتب البلاغ بالعربية..." className="arabic-copy min-h-[300px] w-full resize-y rounded-xl border border-[hsl(var(--input))] bg-[hsl(var(--background))] p-5 text-base text-[hsl(var(--foreground))] outline-none transition focus:border-[hsl(var(--accent))] focus:ring-4 focus:ring-[hsl(var(--accent)/.12)]" /><div className="mt-4 flex items-center justify-between gap-3"><span className="text-xs text-[hsl(var(--muted-foreground))]">{text.length} characters</span><Button onClick={submit} disabled={text.trim().length < 5 || analyze.isPending || create.isPending} data-testid="button-analyze-report">{analyze.isPending ? <><Loader2 className="h-4 w-4 animate-spin" /> Structuring report</> : <><Sparkles className="h-4 w-4" /> Analyze report</>}</Button></div>{analyze.isError && <div className="mt-4"><ErrorPanel message="The analysis service did not respond. Your original text is still here." onRetry={submit} /></div>}</section><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-5 sm:p-7"><div className="mb-5 flex items-center justify-between"><div><p className="font-mono text-xs text-[hsl(var(--primary))]">STRUCTURED OUTPUT</p><h2 className="mt-1 text-lg font-semibold">Structured result</h2></div>{result && <Badge className="border-[hsl(var(--accent)/.35)] bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Check className="mr-1 h-3 w-3" />Analysis complete</Badge>}</div>{result ? <ResultCard result={result} onSave={save} saving={create.isPending} saved={create.isSuccess} /> : <div className="grid min-h-[300px] place-items-center rounded-xl border border-dashed border-[hsl(var(--border))] bg-[hsl(var(--background))] p-8 text-center"><div><div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><Sparkles className="h-5 w-5" /></div><h3 className="font-semibold">Awaiting report submission</h3><p className="mx-auto mt-2 max-w-xs text-sm leading-6 text-[hsl(var(--muted-foreground))]">Classification results will populate here after a report is submitted.</p></div></div>}</section></div>{create.isError && <ErrorPanel message="The report could not be saved. Analyze again if the analysis has expired." onRetry={save} />}</>;
 }
 
 function ResultCard({ result, onSave, saving, saved }: { result: AnalysisResult; onSave: () => void; saving: boolean; saved: boolean }) {
@@ -225,20 +247,18 @@ function Reports() {
   const [incident, setIncident] = useState('');
   const [priority, setPriority] = useState('');
   const [location, setLocation] = useState('');
-  const [sort, setSort] = useState('date');
   const reports = useListReports({
     search: search || undefined,
     incidentClass: incident ? incident as typeof incidentClasses[number] : undefined,
     priority: priority ? priority as typeof priorities[number] : undefined,
     location: location || undefined,
-    sort: sort as 'date' | 'priority' | 'incidentClass',
+    sort: 'date',
   }, { query: { queryKey: getListReportsQueryKey(), placeholderData: STATIC_REPORTS } });
-  const [showFilters, setShowFilters] = useState(false);
-  const deleteReport = useDeleteReport();
+  const [showFilters, setShowFilters] = useState(false);  const deleteReport = useDeleteReport();
   const qc = useQueryClient();
   const clear = () => { setSearch(''); setIncident(''); setPriority(''); setLocation(''); };
   const remove = (id: number) => { if (window.confirm('Permanently delete this report? This action cannot be undone.')) deleteReport.mutate({ id }, { onSuccess: () => { qc.invalidateQueries({ queryKey: getListReportsQueryKey() }); qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetLocationsSummaryQueryKey() }); qc.invalidateQueries({ queryKey: getGetAnalyticsSummaryQueryKey() }); } }); };
-  return <><PageTitle eyebrow="Review queue" title="Saved reports" description="Search and filter the full report archive by class, priority, or location." action={<Link href="/analyze" data-testid="link-new-report" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> New analysis</Link>} /><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-6"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><input value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search-reports" placeholder="Search location, class, or summary..." className="h-11 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--background))] pl-10 pr-3 text-sm outline-none focus:border-[hsl(var(--accent))]" /></div><Button variant="outline" onClick={() => setShowFilters(!showFilters)} data-testid="button-toggle-filters"><SlidersHorizontal className="h-4 w-4" /> Filters <ChevronDown className={cn('h-4 w-4 transition-transform', showFilters && 'rotate-180')} /></Button><select value={sort} onChange={e => setSort(e.target.value)} data-testid="select-sort-reports" className="h-11 rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm font-medium outline-none"><option value="date">Newest first</option><option value="priority">Priority</option><option value="incidentClass">Incident class</option></select></div>{showFilters && <div className="mt-4 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-4 sm:flex-row sm:flex-wrap"><select value={incident} onChange={e => setIncident(e.target.value)} data-testid="select-filter-incident" className="h-10 flex-1 min-w-[160px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All incident classes</option>{incidentClasses.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={priority} onChange={e => setPriority(e.target.value)} data-testid="select-filter-priority" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All priorities</option>{priorities.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={location} onChange={e => setLocation(e.target.value)} data-testid="select-filter-location" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All locations</option>{locationOptions.map(value => <option key={value} value={value}>{value}</option>)}</select><Button variant="ghost" onClick={clear} data-testid="button-clear-filters"><X className="h-4 w-4" /> Clear</Button></div>}<div className="mt-5">{reports.isLoading ? <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}</div> : reports.isError ? <ErrorPanel onRetry={() => reports.refetch()} /> : reports.data?.length ? <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-[hsl(var(--border))] text-[11px] uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]"><th className="px-3 py-3 font-bold">Report</th><th className="px-3 py-3 font-bold">Location</th><th className="px-3 py-3 font-bold">Priority</th><th className="px-3 py-3 font-bold">People at Risk</th><th className="px-3 py-3 font-bold">Required Support</th><th className="px-3 py-3 font-bold">Created</th><th className="px-3 py-3" /></tr></thead><tbody>{reports.data.map(report => <tr key={report.id} className="group border-b border-[hsl(var(--border)/.7)] last:border-0 hover:bg-[hsl(var(--muted)/.35)]"><td className="px-3 py-4"><Link href={`/reports/${report.id}`} data-testid={`link-table-report-${report.id}`} className="block"><p className="max-w-[250px] truncate text-sm font-semibold text-[hsl(var(--foreground))]">{incidentShort(report.incidentClass)}</p><p className="mt-1 max-w-[280px] truncate text-xs text-[hsl(var(--muted-foreground))]">{report.summary}</p></Link></td><td className="px-3 py-4 text-sm">{report.location || '—'}</td><td className="px-3 py-4"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge></td><td className="px-3 py-4 text-sm text-[hsl(var(--muted-foreground))]">{report.peopleAtRisk ? <Badge className="border-red-200 bg-red-50 text-red-700">At risk</Badge> : <span className="text-[hsl(var(--muted-foreground))]">—</span>}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{incidentShort(report.requiredSupport) || '—'}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{formatDate(report.createdAt)}</td><td className="px-3 py-4 text-right"><button onClick={() => remove(report.id)} disabled={deleteReport.isPending} data-testid={`button-delete-report-${report.id}`} aria-label={`Delete report ${report.id}`} className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] opacity-0 transition hover:bg-red-50 hover:text-red-700 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button></td></tr>)}</tbody></table></div> : <EmptyPanel icon={Search} title="No reports match your filters" text="Try a broader search or clear the filters to see the full review queue." action={<Button variant="ghost" onClick={clear} className="mt-4" data-testid="button-empty-clear">Clear filters</Button>} />}</div></section></>;
+  return <><PageTitle eyebrow="" title="Saved reports" description="Search and filter the full report archive by class, priority, or location." action={<Link href="/analyze" data-testid="link-new-report" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[hsl(var(--primary))] px-4 text-sm font-semibold text-white"><Plus className="h-4 w-4" /> New analysis</Link>} /><section className="rounded-2xl border border-[hsl(var(--border))] bg-white p-4 sm:p-6"><div className="flex flex-col gap-3 lg:flex-row"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[hsl(var(--muted-foreground))]" /><input value={search} onChange={e => setSearch(e.target.value)} data-testid="input-search-reports" placeholder="Search location, class, or summary..." className="h-11 w-full rounded-lg border border-[hsl(var(--input))] bg-[hsl(var(--background))] pl-10 pr-3 text-sm outline-none focus:border-[hsl(var(--accent))]" /></div><Button variant="outline" onClick={() => setShowFilters(!showFilters)} data-testid="button-toggle-filters"><SlidersHorizontal className="h-4 w-4" /> Filters <ChevronDown className={cn('h-4 w-4 transition-transform', showFilters && 'rotate-180')} /></Button></div>{showFilters && <div className="mt-4 flex flex-col gap-3 border-t border-[hsl(var(--border))] pt-4 sm:flex-row sm:flex-wrap"><select value={incident} onChange={e => setIncident(e.target.value)} data-testid="select-filter-incident" className="h-10 flex-1 min-w-[160px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All incident classes</option>{incidentClasses.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={priority} onChange={e => setPriority(e.target.value)} data-testid="select-filter-priority" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All priorities</option>{priorities.map(value => <option key={value} value={value}>{value}</option>)}</select><select value={location} onChange={e => setLocation(e.target.value)} data-testid="select-filter-location" className="h-10 flex-1 min-w-[130px] rounded-lg border border-[hsl(var(--input))] bg-white px-3 text-sm"><option value="">All locations</option>{locationOptions.map(value => <option key={value} value={value}>{value}</option>)}</select><Button variant="ghost" onClick={clear} data-testid="button-clear-filters"><X className="h-4 w-4" /> Clear</Button></div>}<div className="mt-5">{reports.isLoading ? <div className="space-y-3">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}</div> : reports.isError ? <ErrorPanel onRetry={() => reports.refetch()} /> : reports.data?.length ? <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-left"><thead><tr className="border-b border-[hsl(var(--border))] text-[11px] uppercase tracking-[.12em] text-[hsl(var(--muted-foreground))]"><th className="px-3 py-3 font-bold">Report</th><th className="px-3 py-3 font-bold">Location</th><th className="px-3 py-3 font-bold">Priority</th><th className="px-3 py-3 font-bold">Class</th><th className="px-3 py-3 font-bold">Created</th><th className="px-3 py-3" /></tr></thead><tbody>{reports.data.map(report => <tr key={report.id} className="group border-b border-[hsl(var(--border)/.7)] last:border-0 hover:bg-[hsl(var(--muted)/.35)]"><td className="px-3 py-4"><Link href={`/reports/${report.id}`} data-testid={`link-table-report-${report.id}`} className="block"><p className="max-w-[250px] truncate text-sm font-semibold text-[hsl(var(--foreground))]" dir="rtl">{report.originalText}</p></Link></td><td className="px-3 py-4 text-sm">{report.location || '—'}</td><td className="px-3 py-4"><Badge className={priorityTone(report.priority)}>{report.priority}</Badge></td><td className="px-3 py-4 text-sm text-[hsl(var(--muted-foreground))]">{incidentShort(report.incidentClass)}</td><td className="px-3 py-4 text-xs text-[hsl(var(--muted-foreground))]">{formatDate(report.createdAt)}</td><td className="px-3 py-4 text-right"><button onClick={() => remove(report.id)} disabled={deleteReport.isPending} data-testid={`button-delete-report-${report.id}`} aria-label={`Delete report ${report.id}`} className="rounded-lg p-2 text-[hsl(var(--muted-foreground))] opacity-0 transition hover:bg-red-50 hover:text-red-700 group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button></td></tr>)}</tbody></table></div> : <EmptyPanel icon={Search} title="No reports match your filters" text="Try a broader search or clear the filters to see the full review queue." action={<Button variant="ghost" onClick={clear} className="mt-4" data-testid="button-empty-clear">Clear filters</Button>} />}</div></section></>;
 }
 
 function ReportDetail() {
@@ -400,6 +420,17 @@ const LIBYA_CITY_COORDS: Record<string, [number, number]> = {
   'Tobruk': [31.9431, 24.0680],
   'سرت': [31.2089, 16.5887],
   'Sirte': [31.2089, 16.5887],
+  'النوفليين': [32.8731, 13.2803],
+  'Noflieen': [32.8731, 13.2803],
+  'تراغن': [26.9000, 14.9333],
+  'Traghan': [26.9000, 14.9333],
+  'حي الأندلس': [32.8850, 13.1650],
+  'Hay Al-Andalus': [32.8850, 13.1650],
+  'طبرق': [31.9431, 24.0680],
+  'قصر بن غشير': [32.7833, 13.2167],
+  'Qasr Ben Ghashir': [32.7833, 13.2167],
+  'هون': [29.1272, 15.9479],
+  'Hun': [29.1272, 15.9479],
 };
 
 function resolveCoords(name: string): [number, number] | null {
@@ -427,7 +458,7 @@ function Locations() {
   return (
     <>
       <PageTitle
-        eyebrow="Geographic lens"
+        eyebrow=""
         title="Reporting locations"
         description="A location-level view of where reports are being received in saved reports."
       />
@@ -613,7 +644,7 @@ function Analytics() {
   };
 
   return <>
-    <PageTitle eyebrow="Pattern review" title="Analytics" description="Explore classification and distribution patterns across the report archive." action={
+    <PageTitle eyebrow="" title="Analytics" description="Explore classification and distribution patterns across the report archive." action={
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" disabled={!canExport} onClick={() => data && downloadAnalytics(data, 'csv')} data-testid="button-export-analytics-csv"><Download className="h-4 w-4" /> Export CSV</Button>
         <Button variant="outline" disabled={!canExport} onClick={() => data && downloadAnalytics(data, 'json')} data-testid="button-export-analytics-json"><Download className="h-4 w-4" /> Export JSON</Button>
@@ -637,9 +668,8 @@ function Analytics() {
     {analytics.isLoading ? <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64" />)}</div> : analytics.isError ? <ErrorPanel onRetry={() => analytics.refetch()} /> : data ? <>
       {data.totalFiltered === 0 && <p role="status" className="mb-4 text-sm text-[hsl(var(--muted-foreground))]">No reports match the applied filters.</p>}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"><StatCard label="People at risk" value={data.peopleAtRisk} note="Reports indicating potential risk" icon={TriangleAlert} tone="red" /><StatCard label="Incident classes" value={data.byIncidentClass.length} note="Classes represented in data" icon={BarChart3} tone="blue" /><StatCard label="Locations" value={data.byLocation.length} note="Areas represented in data" icon={MapPin} tone="teal" /><StatCard label={hasFilters ? 'Filtered reports' : 'Total reports'} value={data.totalFiltered} note={hasFilters ? 'Reports matching the applied filters' : 'Reports in current dataset'} icon={ClipboardList} tone="amber" /></div>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Count by exact incident class"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Review levels in saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div>
-      <div className="mt-6"><ChartPanel title="Reports by location" subtitle={hasFilters ? 'Reports matching the applied filters' : 'Current saved dataset'}><div className="mt-5 space-y-4">{data.byLocation.map(item => <div key={item.label} className="flex items-center gap-3"><span className="w-28 truncate text-xs text-[hsl(var(--muted-foreground))]">{item.label}</span><div className="h-8 flex-1 overflow-hidden rounded-md bg-[hsl(var(--muted))]"><div className="flex h-full items-center rounded-md bg-[hsl(var(--primary))] px-2 text-xs font-bold text-white" style={{ width: `${Math.max(8, item.count / max * 100)}%` }}>{item.count}</div></div></div>)}</div></ChartPanel></div>
-      <Evaluation data={data.evaluation} />
+      <div className="mt-6 grid gap-6 lg:grid-cols-2"><ChartPanel title="Incident distribution" subtitle="Distribution of reported incident types"><BarList items={data.byIncidentClass} colors={['bg-[hsl(var(--primary))]', 'bg-[hsl(var(--accent))]', 'bg-teal-500', 'bg-amber-500', 'bg-rose-500', 'bg-slate-400']} /></ChartPanel><ChartPanel title="Priority distribution" subtitle="Priority levels across all saved reports"><BarList items={data.byPriority} colors={['bg-red-500', 'bg-amber-500', 'bg-blue-500', 'bg-slate-400']} /></ChartPanel></div>
+
     </> : null}
   </>;
 }
@@ -655,50 +685,29 @@ function Evaluation({ data }: { data: AnalyticsSummary['evaluation'] }) {
 
 function About() {
   return (
-    <div className="-mx-5 -mt-8 min-h-[calc(100dvh-72px)] px-5 py-10 sm:-mx-8 sm:px-8 lg:py-16">
-      <div className="mx-auto max-w-4xl">
-        <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[hsl(var(--primary))]">
-          <ShieldCheck className="h-4 w-4" /> Balaagh AI / About
-        </p>
-        <h1 className="max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-.045em] sm:text-6xl">About Balaagh AI</h1>
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-[hsl(var(--muted-foreground))]">
-          Balaagh AI is a university capstone prototype for turning unstructured Arabic reports in the Libyan context into a reviewable set of signals.
-        </p>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          <AboutCard number="01" title="Purpose" text="Help analysts move from a long Arabic report to a consistent structured record without losing the original wording." />
-          <AboutCard number="02" title="AI approach" text="AraBERT classifies incident category and priority. MARBERT extracts Libyan locations. A unified multi-task MARBERT model handles all three tasks jointly." />
-          <AboutCard number="03" title="Operational scope" text="Balaagh AI is a classification and review tool, not emergency dispatch software. All outputs require human verification before operational action." />
-        </div>
-        <div className="mt-7 rounded-2xl border border-[hsl(var(--border))] bg-white/80 p-6 sm:p-8">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-semibold">How the analysis is structured</h2>
-              <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-                Arabic reports are processed by trained category, priority, and location models. Analysts review the resulting fields and can correct saved records. Required support starts empty and can be supplied during review.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="mt-5 rounded-2xl border border-[hsl(var(--accent)/.35)] bg-white/80 p-6 sm:p-8">
-          <div className="flex gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
-              <Info className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-semibold">A note on responsible use</h2>
-              <p className="mt-2 text-sm leading-7 text-[hsl(var(--muted-foreground))]">
-                The classifications and evaluation outputs shown in this interface are AI-generated and require verification. They do not replace local expertise, source verification, safety protocols, or decisions by qualified responders.
-              </p>
-            </div>
-          </div>
-        </div>
-        <Link href="/" data-testid="link-about-home" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--primary))]">
-          <ArrowLeft className="h-4 w-4" /> Return to dashboard
-        </Link>
+    <div>
+      <PageTitle eyebrow="" title="About Balaagh AI" description="A capstone project that turns unstructured Arabic crisis reports from Libya into structured, reviewable records using AI." />
+
+      <div className="mt-2 grid gap-4 md:grid-cols-3">
+        <AboutCard number="01" title="Purpose" text="Help analysts quickly structure Arabic crisis reports without losing the original wording." />
+        <AboutCard number="02" title="AI Models" text="AraBERT and MARBERT models were trained and evaluated for incident classification, priority prediction, and location extraction as part of this research." />
+        <AboutCard number="03" title="Scope" text="A classification and review tool — not emergency dispatch software. All outputs require human verification." />
       </div>
+
+      <div className="mt-5 rounded-2xl border border-[hsl(var(--accent)/.35)] bg-white/80 p-5 sm:p-6">
+        <div className="flex gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]">
+            <Info className="h-4 w-4" />
+          </div>
+          <p className="text-sm leading-7 text-[hsl(var(--muted-foreground))]">
+            All AI outputs are generated automatically and require human verification before any operational action. They do not replace local expertise or qualified responders.
+          </p>
+        </div>
+      </div>
+
+      <Link href="/" data-testid="link-about-home" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[hsl(var(--primary))]">
+        <ArrowLeft className="h-4 w-4" /> Return to dashboard
+      </Link>
     </div>
   );
 }
@@ -721,6 +730,24 @@ function PublicSubmit() {
   const qc = useQueryClient();
   const busy = analyze.isPending || create.isPending;
   const quickExamples: string[] = [];
+
+  const playSuccessSound = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.4);
+    } catch (_) {}
+  };
+
   const submit = () => {
     const originalText = text.trim();
     if (!originalText || busy) return;
@@ -731,6 +758,7 @@ function PublicSubmit() {
           onSuccess: () => {
             setText('');
             setSubmitted(true);
+            playSuccessSound();
             qc.invalidateQueries({ queryKey: getListReportsQueryKey() });
             qc.invalidateQueries({ queryKey: getGetDashboardSummaryQueryKey() });
             qc.invalidateQueries({ queryKey: getGetLocationsSummaryQueryKey() });
@@ -748,8 +776,8 @@ function PublicSubmit() {
     <main className="relative mx-auto max-w-[1180px] px-5 py-6 sm:px-8 sm:py-6">
       <div className="grid items-stretch gap-6 lg:grid-cols-[.82fr_1.18fr]">
         <section className="order-2 overflow-hidden rounded-[2rem] bg-[hsl(var(--sidebar))] p-7 text-white shadow-[0_24px_70px_hsl(216_43%_18%_/_0.22)] sm:p-9 lg:order-1">
-          <div className="flex items-center gap-3"><div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-5 w-5" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p></div></div>
-          <h2 className="mt-16 max-w-sm text-3xl font-semibold leading-[1.2] tracking-[-.03em] sm:text-4xl">بلاغك يوصل بصورة أوضح.</h2>
+          <div className="flex items-center gap-3"><div className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary))] text-[hsl(var(--sidebar-primary-foreground))]"><ShieldCheck className="h-6 w-6" /><span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-[hsl(var(--accent))] ring-2 ring-[hsl(var(--sidebar))]" /></div><div><p className="text-base font-bold tracking-tight text-white">Balaagh <span className="text-[hsl(var(--sidebar-primary))]">AI</span></p></div></div>
+          <h2 className="mt-6 max-w-sm text-3xl font-semibold leading-[1.2] tracking-[-.03em] sm:text-4xl">بلاغك يوصل بصورة أوضح.</h2>
           <p className="mt-5 max-w-sm text-sm leading-7 text-[hsl(var(--sidebar-foreground)/.68)]">اكتب ما حدث كما وصلتك المعلومة. النظام يحافظ على النص الأصلي ويجهزه للمراجعة داخل فريق Balaagh AI.</p>
           <div className="mt-10 space-y-3">
             <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[.06] p-4"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--sidebar-primary)/.16)] text-[hsl(var(--sidebar-primary))] font-mono text-xs">01</span><div><p className="text-sm font-semibold">استلام البلاغ</p><p className="mt-1 text-xs text-[hsl(var(--sidebar-foreground)/.55)]">يتم حفظ النص كما كتبته</p></div></div>
@@ -760,7 +788,7 @@ function PublicSubmit() {
         </section>
         <section className="order-1 rounded-[2rem] border border-[hsl(var(--border))] bg-white p-6 shadow-[0_24px_70px_hsl(220_30%_40%_/_0.08)] sm:p-10 lg:order-2">
           <div className="mb-8"><h1 className="text-4xl font-semibold tracking-[-.045em] sm:text-5xl">قدم بلاغ</h1><p className="mt-4 max-w-xl text-base leading-7 text-[hsl(var(--muted-foreground))]">شارك تفاصيل البلاغ كما وصلتك، حتى تصل المعلومة بصورة أوضح إلى فريق المراجعة.</p></div>
-          {submitted ? <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700"><Check className="h-6 w-6" /></div><h2 className="mt-5 text-xl font-semibold">تم استلام البلاغ</h2><p className="mt-2 text-sm leading-7 text-emerald-900/75">شكراً لمساهمتك. تم حفظ البلاغ للمراجعة داخل نظام Balaagh AI.</p><button type="button" onClick={() => setSubmitted(false)} className="mt-6 inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800">إرسال بلاغ آخر</button></div> : <><label htmlFor="public-report" className="mb-3 block text-sm font-semibold">تفاصيل البلاغ</label><textarea id="public-report" dir="rtl" value={text} onChange={e => { setText(e.target.value); setSubmitted(false); }} maxLength={5000} disabled={busy} data-testid="textarea-public-report" placeholder="اكتب البلاغ بالعربية..." className={cn("arabic-copy min-h-[230px] w-full resize-y rounded-2xl border bg-[hsl(var(--background))] p-5 text-base leading-8 outline-none transition focus:ring-4", /[a-zA-Z]/.test(text) ? "border-red-400 focus:border-red-400 focus:ring-red-100" : "border-[hsl(var(--input))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent)/.12)]")} /><div className="mt-3 flex items-center justify-between gap-3 text-xs text-[hsl(var(--muted-foreground))]"><span>{text.length} حرف</span><span>يُقبل النص العربي فقط</span></div>{text.length > 0 && /[a-zA-Z]/.test(text) && <p className="mt-2 text-sm text-red-600">يُرجى الكتابة بالعربية فقط.</p>}<Button onClick={submit} disabled={text.trim().length < 5 || busy || /[a-zA-Z]/.test(text)} className="mt-7 min-h-12 w-full rounded-xl" data-testid="button-submit-public-report">{busy ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري حفظ البلاغ</> : <><Send className="h-4 w-4" /> إرسال البلاغ للمراجعة</>}</Button><p className="mt-4 text-center text-xs leading-6 text-[hsl(var(--muted-foreground))]">لا تكتب كلمات المرور أو البيانات الشخصية الحساسة.</p>{(analyze.isError || create.isError) && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">تعذر إرسال البلاغ حالياً. حاول مرة أخرى بعد قليل.</div>}</>}
+          {submitted ? <div role="status" aria-live="polite" className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-emerald-950"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700"><Check className="h-6 w-6" /></div><h2 className="mt-5 text-xl font-semibold">تم استلام البلاغ</h2><p className="mt-2 text-sm leading-7 text-emerald-900/75">شكراً لمساهمتك. تم حفظ البلاغ للمراجعة داخل نظام Balaagh AI.</p><button type="button" onClick={() => setSubmitted(false)} className="mt-6 inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-semibold text-white transition hover:bg-emerald-800">إرسال بلاغ آخر</button></div> : <><label htmlFor="public-report" className="mb-3 block text-sm font-semibold">تفاصيل البلاغ</label><textarea id="public-report" dir="rtl" value={text} onChange={e => { setText(e.target.value); setSubmitted(false); }} maxLength={5000} disabled={busy} data-testid="textarea-public-report" placeholder="اكتب البلاغ بالعربية..." className={cn("arabic-copy min-h-[230px] w-full resize-y rounded-2xl border bg-[hsl(var(--background))] p-5 text-base leading-8 outline-none transition focus:ring-4", /[a-zA-Z]/.test(text) ? "border-red-400 focus:border-red-400 focus:ring-red-100" : "border-[hsl(var(--input))] focus:border-[hsl(var(--accent))] focus:ring-[hsl(var(--accent)/.12)]")} /><div className="mt-3 flex items-center justify-between gap-3 text-xs text-[hsl(var(--muted-foreground))]"><span>يُقبل النص العربي فقط</span><span>{text.length} حرف</span></div>{text.length > 0 && /[a-zA-Z]/.test(text) && <p className="mt-2 text-sm text-red-600">يُرجى الكتابة بالعربية فقط.</p>}<Button onClick={submit} disabled={text.trim().length < 5 || busy || /[a-zA-Z]/.test(text)} className="mt-7 min-h-12 w-full rounded-xl" data-testid="button-submit-public-report">{busy ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري حفظ البلاغ</> : <><Send className="h-4 w-4" /> إرسال البلاغ للمراجعة</>}</Button><p className="mt-4 text-center text-xs leading-6 text-[hsl(var(--muted-foreground))]">لا تكتب كلمات المرور أو البيانات الشخصية الحساسة.</p>{(analyze.isError || create.isError) && <div role="alert" className="mt-5 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">تعذر إرسال البلاغ حالياً. حاول مرة أخرى بعد قليل.</div>}</>}
         </section>
       </div>
       <div className="mx-auto mt-6 flex max-w-3xl items-start gap-3 rounded-2xl border border-[hsl(var(--accent)/.24)] bg-white/70 p-4 text-xs leading-6 text-[hsl(var(--muted-foreground))]"><Info className="mt-1 h-4 w-4 shrink-0 text-[hsl(var(--primary))]" /><p>هذه الصفحة مخصصة لتسجيل البلاغات للمراجعة. إرسال البلاغ لا يعني إرسال خدمة طوارئ أو اتخاذ إجراء ميداني تلقائي.</p></div>

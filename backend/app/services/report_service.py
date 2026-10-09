@@ -122,34 +122,47 @@ async def list_reports(
     return [serialize_report(row) for row in rows]
 
 
-async def dashboard(session, timezone):
+async def dashboard(session, timezone, filter: str = "today"):
     zone = ZoneInfo(timezone)
     today = datetime.now(zone).date()
     start = datetime.combine(today, time.min, tzinfo=zone).astimezone(UTC)
     end = datetime.combine(today + timedelta(days=1), time.min, tzinfo=zone).astimezone(UTC)
+    # For "today" filter: reports from start of today until now
+    filter_start = start if filter == "today" else None
+
+    # Apply date filter to main counts and recent reports
+    date_filter = (ReportRow.created_at >= filter_start) if filter == "today" else True
+
     values = (
         await session.execute(
             select(
-                func.count(ReportRow.id),
-                func.count(case((ReportRow.priority == "Critical", 1))),
-                func.count(case((ReportRow.priority == "High", 1))),
+                func.count(case((date_filter, ReportRow.id))),
+                func.count(case(((date_filter) & (ReportRow.priority == "Critical"), 1))),
+                func.count(case(((date_filter) & (ReportRow.priority == "High"), 1))),
                 func.count(
                     case(((ReportRow.created_at >= start) & (ReportRow.created_at < end), 1))
                 ),
             )
         )
     ).one()
-    recent = await session.scalars(
-        select(ReportRow).order_by(ReportRow.created_at.desc(), ReportRow.id.desc()).limit(6)
-    )
+    recent_q = select(ReportRow).order_by(ReportRow.created_at.desc(), ReportRow.id.desc()).limit(6)
+    if filter == "today":
+        recent_q = recent_q.where((ReportRow.created_at >= start) & (ReportRow.created_at < end))
+    recent = await session.scalars(recent_q)
+    incident_q = select(ReportRow.incident_class)
+    priority_q = select(ReportRow.priority)
+    if filter == "today":
+        incident_q = incident_q.where((ReportRow.created_at >= start) & (ReportRow.created_at < end))
+        priority_q = priority_q.where((ReportRow.created_at >= start) & (ReportRow.created_at < end))
     return dict(
         total_reports=values[0],
         critical_reports=values[1],
         high_priority=values[2],
         reports_today=values[3],
         recent_reports=[serialize_report(r) for r in recent],
-        by_incident_class=await counts(session, ReportRow.incident_class),
-        by_priority=await counts(session, ReportRow.priority),
+        by_incident_class=await counts(session, ReportRow.incident_class, filter == "today", ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
+        by_priority=await counts(session, ReportRow.priority, filter == "today", ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
+        by_location=await counts(session, ReportRow.location, True, ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
     )
 
 

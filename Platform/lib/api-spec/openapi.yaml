@@ -188,6 +188,15 @@ paths:
       tags:
       - dashboard
       summary: Get dashboard statistics and recent reports
+      parameters:
+      - name: filter
+        in: query
+        required: false
+        schema:
+          type: string
+          enum: [today, all]
+          default: today
+        description: Filter reports by today or all time
       responses:
         '200':
           description: Dashboard summary
