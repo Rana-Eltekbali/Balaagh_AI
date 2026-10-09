@@ -10,10 +10,8 @@ Default BASE_URL: http://127.0.0.1:8000
 
 import sys
 import os
-import json
 import time
 import random
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # ── load .env manually (no extra dep needed) ────────────────────────────────
