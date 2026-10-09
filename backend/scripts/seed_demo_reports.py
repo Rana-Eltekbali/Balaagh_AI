@@ -8,10 +8,10 @@ Reads DEMO_API_TOKEN and the optional BASE_URL from backend/.env.
 Default BASE_URL: http://127.0.0.1:8000
 """
 
-import sys
 import os
-import time
 import random
+import sys
+import time
 from pathlib import Path
 
 # ── load .env manually (no extra dep needed) ────────────────────────────────
