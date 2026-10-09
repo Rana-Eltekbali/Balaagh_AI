@@ -126,6 +126,7 @@ export interface DashboardSummary {
   recentReports: Report[];
   byIncidentClass: CountItem[];
   byPriority: CountItem[];
+  byLocation: CountItem[];
 }
 
 export interface LocationSummary {
@@ -180,6 +181,17 @@ export type ApiErrorError = {
 export interface ApiError {
   error: ApiErrorError;
 }
+
+export type GetDashboardSummaryFilter = typeof GetDashboardSummaryFilter[keyof typeof GetDashboardSummaryFilter];
+
+export const GetDashboardSummaryFilter = {
+  today: 'today',
+  all: 'all',
+} as const;
+
+export type GetDashboardSummaryParams = {
+  filter?: GetDashboardSummaryFilter;
+};
 
 export type SearchParameter = string;
 

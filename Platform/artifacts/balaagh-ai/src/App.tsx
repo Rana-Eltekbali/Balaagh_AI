@@ -13,6 +13,7 @@ import {
   type AnalysisResult,
   type AnalyticsSummary,
   type GetAnalyticsSummaryParams,
+  type GetDashboardSummaryParams,
   type CountItem,
   type Report,
 } from '@workspace/api-client-react';
@@ -152,7 +153,7 @@ const fieldLabel: Record<string, string> = {
 
 function Overview() {
   const [filter, setFilter] = useState<'today' | 'all'>('today');
-  const dashboard = useGetDashboardSummary(filter, { query: { queryKey: getGetDashboardSummaryQueryKey(filter), placeholderData: filter === 'today' ? STATIC_DASHBOARD_TODAY : STATIC_DASHBOARD } });
+  const dashboard = useGetDashboardSummary({ filter }, { query: { queryKey: getGetDashboardSummaryQueryKey({ filter }), placeholderData: filter === 'today' ? STATIC_DASHBOARD_TODAY : STATIC_DASHBOARD } });
   const edits = useReportEdits();
   const data = dashboard.data;
   return <>

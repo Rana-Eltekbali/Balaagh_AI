@@ -26,6 +26,7 @@ import type {
   ApiError,
   DashboardSummary,
   GetAnalyticsSummaryParams,
+  GetDashboardSummaryParams,
   HealthStatus,
   ListReportsParams,
   LocationsSummary,
@@ -640,30 +641,31 @@ export const useDeleteReport = <TError = ErrorType<ApiError>,
       return useMutation(getDeleteReportMutationOptions(options));
     }
 
-export const getGetDashboardSummaryUrl = (filter?: 'today' | 'all') => {
-  const params = filter && filter !== 'today' ? `?filter=${filter}` : '';
-  return `/api/dashboard/summary${params}`
+export const getGetDashboardSummaryUrl = (params?: GetDashboardSummaryParams) => {
+  const filter = params?.filter;
+  const qs = filter && filter !== 'today' ? `?filter=${filter}` : '';
+  return `/api/dashboard/summary${qs}`;
 }
 /**
  * @summary Get dashboard statistics and recent reports
  */
-export const getDashboardSummary = async (filter?: 'today' | 'all', options?: Parameters<typeof customFetch>[1]): Promise<DashboardSummary> => {
-  return customFetch<DashboardSummary>(getGetDashboardSummaryUrl(filter),
+export const getDashboardSummary = async (params?: GetDashboardSummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<DashboardSummary> => {
+  return customFetch<DashboardSummary>(getGetDashboardSummaryUrl(params),
   {
     ...options,
     method: 'GET'
   }
 );}
-export const getGetDashboardSummaryQueryKey = (filter?: 'today' | 'all') => {
+export const getGetDashboardSummaryQueryKey = (params?: GetDashboardSummaryParams) => {
     return [
-    `/api/dashboard/summary`, { filter: filter ?? 'today' }
+    `/api/dashboard/summary`, { filter: params?.filter ?? 'today' }
     ] as const;
     }
-export const getGetDashboardSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardSummary>>, TError = ErrorType<ApiError>>(filter?: 'today' | 'all', options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetDashboardSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getDashboardSummary>>, TError = ErrorType<ApiError>>(params?: GetDashboardSummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 const {query: queryOptions, request: requestOptions} = options ?? {};
-  const queryKey =  queryOptions?.queryKey ?? getGetDashboardSummaryQueryKey(filter);
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardSummary>>> = ({ signal }) => getDashboardSummary(filter, { signal, ...requestOptions });
+  const queryKey =  queryOptions?.queryKey ?? getGetDashboardSummaryQueryKey(params);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDashboardSummary>>> = ({ signal }) => getDashboardSummary(params, { signal, ...requestOptions });
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDashboardSummary>>, TError, TData> & { queryKey: QueryKey }
 }
 export type GetDashboardSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getDashboardSummary>>>
@@ -672,10 +674,10 @@ export type GetDashboardSummaryQueryError = ErrorType<ApiError>
  * @summary Get dashboard statistics and recent reports
  */
 export function useGetDashboardSummary<TData = Awaited<ReturnType<typeof getDashboardSummary>>, TError = ErrorType<ApiError>>(
-  filter?: 'today' | 'all',
+  params?: GetDashboardSummaryParams,
   options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDashboardSummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
-  const queryOptions = getGetDashboardSummaryQueryOptions(filter, options)
+  const queryOptions = getGetDashboardSummaryQueryOptions(params, options)
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
   return withQueryKey(query, queryOptions.queryKey);
 }

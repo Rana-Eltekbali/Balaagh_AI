@@ -525,6 +525,7 @@ components:
       - recentReports
       - byIncidentClass
       - byPriority
+      - byLocation
       properties:
         totalReports:
           type: integer
@@ -543,6 +544,10 @@ components:
           items:
             $ref: '#/components/schemas/CountItem'
         byPriority:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountItem'
+        byLocation:
           type: array
           items:
             $ref: '#/components/schemas/CountItem'
