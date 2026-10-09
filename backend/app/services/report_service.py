@@ -169,9 +169,7 @@ async def dashboard(session, timezone, filter: str = "today"):
         by_incident_class=await counts(
             session, ReportRow.incident_class, filter == "today", today_filters
         ),
-        by_priority=await counts(
-            session, ReportRow.priority, filter == "today", today_filters
-        ),
+        by_priority=await counts(session, ReportRow.priority, filter == "today", today_filters),
         by_location=await counts(session, ReportRow.location, True, today_filters),
     )
 
