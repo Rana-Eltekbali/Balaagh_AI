@@ -152,17 +152,27 @@ async def dashboard(session, timezone, filter: str = "today"):
     incident_q = select(ReportRow.incident_class)
     priority_q = select(ReportRow.priority)
     if filter == "today":
-        incident_q = incident_q.where((ReportRow.created_at >= start) & (ReportRow.created_at < end))
-        priority_q = priority_q.where((ReportRow.created_at >= start) & (ReportRow.created_at < end))
+        date_range = (ReportRow.created_at >= start) & (ReportRow.created_at < end)
+        incident_q = incident_q.where(date_range)
+        priority_q = priority_q.where(date_range)
+    today_filters = (
+        ((ReportRow.created_at >= start) & (ReportRow.created_at < end),)
+        if filter == "today"
+        else ()
+    )
     return dict(
         total_reports=values[0],
         critical_reports=values[1],
         high_priority=values[2],
         reports_today=values[3],
         recent_reports=[serialize_report(r) for r in recent],
-        by_incident_class=await counts(session, ReportRow.incident_class, filter == "today", ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
-        by_priority=await counts(session, ReportRow.priority, filter == "today", ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
-        by_location=await counts(session, ReportRow.location, True, ((ReportRow.created_at >= start) & (ReportRow.created_at < end),) if filter == "today" else ()),
+        by_incident_class=await counts(
+            session, ReportRow.incident_class, filter == "today", today_filters
+        ),
+        by_priority=await counts(
+            session, ReportRow.priority, filter == "today", today_filters
+        ),
+        by_location=await counts(session, ReportRow.location, True, today_filters),
     )
 
 
